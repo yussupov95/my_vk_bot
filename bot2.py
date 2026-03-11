@@ -68,12 +68,12 @@ async def start_handler(message: Message):
 async def help_handler(message: Message):
     help_text = (
         "📋 **Доступные команды**\n\n"
-        "🔹 **Сделать ссылку** – отправь фото, получишь короткую ссылку.\n"
-        "🔹 **Видео ссылка** – отправь видео, получишь короткую ссылку.\n"
-        "🔹 **Благотворительность** – номер карты для поддержки.\n"
-        "🔹 **Мои ссылки** – история последних 5 созданных ссылок.\n"
-        "🔹 **Техподдержка** – связь с администратором.\n"
-        "🔹 **Начать** – приветствие."
+        "🔹 Сделать ссылку – отправь фото, получишь короткую ссылку.\n"
+        "🔹 Видео ссылка – отправь видео, получишь короткую ссылку.\n"
+        "🔹 Благотворительность – номер карты для поддержки.\n"
+        "🔹 Мои ссылки – история последних 5 созданных ссылок.\n"
+        "🔹 Техподдержка – связь с администратором.\n"
+        "🔹 Начать – приветствие."
     )
     await message.answer(help_text, keyboard=get_keyboard())
 
@@ -90,14 +90,14 @@ async def donate_handler(message: Message):
 @bot.on.message(text=["Сделать ссылку", "сделать ссылку", "ссылка", "Ссылка"])
 async def make_link_handler(message: Message):
     await message.answer(
-        "Отправь мне **фото**, и я сделаю из него короткую ссылку!",
+        "Отправь мне фото, и я сделаю из него короткую ссылку!",
         keyboard=get_keyboard()
     )
 
 @bot.on.message(text=["Видео ссылка", "видео ссылка", "видео"])
 async def video_link_handler(message: Message):
     await message.answer(
-        "Отправь мне **видео**, и я сделаю из него короткую ссылку!",
+        "Отправь мне видео, и я сделаю из него короткую ссылку!",
         keyboard=get_keyboard()
     )
 
@@ -106,7 +106,8 @@ async def photo_handler(message: Message):
     photo = message.attachments[0].photo
     long_url = photo.sizes[-1].url
     short_url = await shorten_url(long_url)
-    photo_id = f"photo{photo.owner_id}_{photo.id}"_link(message.from_id, short_url, "фото")
+    photo_id = f"photo{photo.owner_id}_{photo.id}"
+    add_link(message.from_id, short_url, "фото")
     await message.answer(
         f"✅ Готово!\n\n"
         f"📌 Короткая ссылка:\n{short_url}\n\n"
@@ -165,7 +166,6 @@ async def unknown_handler(message: Message):
         keyboard=get_keyboard()
     )
 
-if __name__ == "__main__":
+if name == "__main__":
     print("✅ Бот запущен и ждёт сообщения...")
-    bot.run_forever() add
-
+    bot.run_forever()
