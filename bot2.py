@@ -163,6 +163,7 @@ async def unknown_handler(message: Message):
         keyboard=get_keyboard()
     )
 
-if _name_ == "_main_":
+if __name__ == "_main_":
     print("✅ Бот запущен и ждёт сообщения...")
     bot.run_forever()
+
