@@ -4,7 +4,7 @@ import aiohttp
 import json
 import os
 
-TOKEN = "vk1.a.HEt17KHUp8qmk7p42fTXhpw7vx6Cu4AW5vbpROm8tWJE_0ha3WPCfGH_HfWGMFHh2G5Ep4VmKZPVqPJ7-r58qYGnHKd3W8J5Pr7Oe0bjXCQ-CJmSXjz_kxR9aqlrAStSQwOQ5ML0c2VMnCZICPTm_-qbjFDZOTnOjtGQtjYNOtJXqjq54MaEZ60XZu6JL6ZetOFOvzzIUXUEzGq1Nfm3eA"
+TOKEN = "vk1.a.IShdbvc7y-WNl-laMuw1g-vYEwLHjNk-nPqHZSsPbjC0Ul-dYBVjPyeur0z1i4L5r-XARvPy3p38cedqN38bFvUKqM-uRf8F8AOlJcsqe5r30NWWxep87JyZOw8xwLXXjtr5VDkrm34oo8Doznrqh3K-CdPhUd4ymOI-sjYh47PC4gisZckSK8SOFG-7nzxyBofyRfk9PUm5yaFsWVRFsQ"
 
 bot = Bot(token=TOKEN)
 
@@ -169,3 +169,4 @@ async def unknown_handler(message: Message):
 if name == "__main__":
     print("✅ Бот запущен и ждёт сообщения...")
     bot.run_forever()
+
