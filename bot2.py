@@ -4,7 +4,7 @@ import aiohttp
 import json
 import os
 
-TOKEN = "vk1.a.HEt17KHUp8qmK7p42fTxHpw7vx6Cu4AW5vbPR0m8tWJE_0ha3WPcFGH_HfVGMFHh2G5Ep4VmKZPVqPJ7-r58qY"
+TOKEN = "vk1.a.HEt17KHUp8qmk7p42fTXhpw7vx6Cu4AW5vbpROm8tWJE_0ha3WPCfGH_HfWGMFHh2G5Ep4VmKZPVqPJ7-r58qYGnHKd3W8J5Pr7Oe0bjXCQ-CJmSXjz_kxR9aqlrAStSQwOQ5ML0c2VMnCZICPTm_-qbjFDZOTnOjtGQtjYNOtJXqjq54MaEZ60XZu6JL6ZetOFOvzzIUXUEzGq1Nfm3eA"
 
 bot = Bot(token=TOKEN)
 
@@ -79,7 +79,7 @@ async def help_handler(message: Message):
 
 @bot.on.message(text=["Благотворительность", "благотворительность", "карта", "помочь"])
 async def donate_handler(message: Message):
-    card_number = "2202 2000 1234 5678"  # замени на свой номер!
+    card_number = "2202 2081 4442 2046"  # замени на свой номер!
     await message.answer(
         f"🙏 Спасибо за поддержку!\n\n"
         f"💳 Номер карты Сбера:\n`{card_number}`\n\n"
@@ -168,3 +168,4 @@ async def unknown_handler(message: Message):
 if __name__ == "__main__":
     print("✅ Бот запущен и ждёт сообщения...")
     bot.run_forever() add
+
