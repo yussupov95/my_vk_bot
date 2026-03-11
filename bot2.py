@@ -170,3 +170,4 @@ if name == "__main__":
     print("✅ Бот запущен и ждёт сообщения...")
     bot.run_forever()
 
+
