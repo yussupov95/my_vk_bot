@@ -67,19 +67,19 @@ async def start_handler(message: Message):
 @bot.on.message(text=["Помощь", "помощь", "help", "Help"])
 async def help_handler(message: Message):
     help_text = (
-        "📋 **Доступные команды**\n\n"
-        "🔹 Сделать ссылку – отправь фото, получишь короткую ссылку.\n"
-        "🔹 Видео ссылка – отправь видео, получишь короткую ссылку.\n"
-        "🔹 Благотворительность – номер карты для поддержки.\n"
-        "🔹 Мои ссылки – история последних 5 созданных ссылок.\n"
-        "🔹 Техподдержка – связь с администратором.\n"
-        "🔹 Начать – приветствие."
+        "📋 *Доступные команды*\n\n"
+        "🔹 *Сделать ссылку* – отправь фото, получишь короткую ссылку.\n"
+        "🔹 *Видео ссылка* – отправь видео, получишь короткую ссылку.\n"
+        "🔹 *Благотворительность* – номер карты для поддержки.\n"
+        "🔹 *Мои ссылки* – история последних 5 созданных ссылок.\n"
+        "🔹 *Техподдержка* – связь с администратором.\n"
+        "🔹 *Начать* – приветствие."
     )
     await message.answer(help_text, keyboard=get_keyboard())
 
 @bot.on.message(text=["Благотворительность", "благотворительность", "карта", "помочь"])
 async def donate_handler(message: Message):
-    card_number = "2202 2081 4442 2046"  # замени на свой номер!
+    card_number = "2202 2081 4442 2046"  # замени на свой номер
     await message.answer(
         f"🙏 Спасибо за поддержку!\n\n"
         f"💳 Номер карты Сбера:\n`{card_number}`\n\n"
@@ -90,14 +90,14 @@ async def donate_handler(message: Message):
 @bot.on.message(text=["Сделать ссылку", "сделать ссылку", "ссылка", "Ссылка"])
 async def make_link_handler(message: Message):
     await message.answer(
-        "Отправь мне фото, и я сделаю из него короткую ссылку!",
+        "Отправь мне *фото*, и я сделаю из него короткую ссылку!",
         keyboard=get_keyboard()
     )
 
 @bot.on.message(text=["Видео ссылка", "видео ссылка", "видео"])
 async def video_link_handler(message: Message):
     await message.answer(
-        "Отправь мне видео, и я сделаю из него короткую ссылку!",
+        "Отправь мне *видео*, и я сделаю из него короткую ссылку!",
         keyboard=get_keyboard()
     )
 
@@ -122,12 +122,10 @@ async def video_handler(message: Message):
         long_url = video.files[0].url if video.files else None
     else:
         long_url = f"https://vk.com/video{video.owner_id}_{video.id}"
-    
     if long_url:
         short_url = await shorten_url(long_url)
     else:
         short_url = "Не удалось получить ссылку"
-    
     video_id = f"video{video.owner_id}_{video.id}"
     add_link(message.from_id, short_url, "видео")
     await message.answer(
@@ -143,8 +141,7 @@ async def history_handler(message: Message):
     if user_id not in history_db or not history_db[user_id]:
         await message.answer("У вас пока нет сохранённых ссылок.", keyboard=get_keyboard())
         return
-    
-    lines = ["📜 **Ваши последние ссылки:**\n"]
+    lines = ["📜 *Ваши последние ссылки:*\n"]
     for idx, item in enumerate(history_db[user_id], 1):
         lines.append(f"{idx}. {item['type']}: {item['link']}")
     await message.answer("\n".join(lines), keyboard=get_keyboard())
@@ -166,8 +163,6 @@ async def unknown_handler(message: Message):
         keyboard=get_keyboard()
     )
 
-if name == "__main__":
+if _name_ == "_main_":
     print("✅ Бот запущен и ждёт сообщения...")
     bot.run_forever()
-
-
