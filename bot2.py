@@ -112,7 +112,8 @@ async def history_handler(message: Message):
      enumerate(history_db[user_id], 1):
         lines.append(f"{idx}.
         {item['type']}: {item['link']}")
-    await message.answer("\n".join(lines), keyboard=get_keyboard())
+    await 
+    message.answer("\n".join(lines), keyboard=get_keyboard())
 
 @bot.on.message(text=["Техподдержка", "техподдержка", "поддержка", "Помощь", "помощь"])
 async def support_handler(message: Message):
@@ -191,4 +192,5 @@ async def video_handler(message: Message):
         keyboard=get_keyboard()
     )
     
+
 
