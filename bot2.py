@@ -184,7 +184,7 @@ async def reviews_handler(message: Message):
     if message.from_id != message.peer_id:
         return
     reviews_link = "https://vk.com/wall-236560135_7"  # замени на свою ссылку
-    await message.answer(ht
+    await message.answer(
         f"📝 Оставьте отзыв здесь:\n{reviews_link}",
         keyboard=get_keyboard()
     )
@@ -211,3 +211,4 @@ async def unknown_handler(message: Message):
 if __name__ == "__main__":
     print("✅ Бот запущен и ждёт сообщения...")
     bot.run_forever()
+
