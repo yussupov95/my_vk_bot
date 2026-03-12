@@ -1,11 +1,10 @@
 from vkbottle.bot import Bot, Message
 from vkbottle import Keyboard, KeyboardButtonColor, Text
-import aiohttp
 import json
 import os
+import aiohttp
 
-# Вставь сюда свой токен (полностью, в одну строку)
-TOKEN = "vk1.a.IShdbvc7y-WNl-laMuw1g-vYEwLHjNk-nPqHZSsPbjC0Ul-dYBVjPyeur0z1i4L5r-XARvPy3p38cedqN38bFvUKqM-uRf8F8AOlJcsqe5r30NWWxep87JyZOw8xwLXXjtr5VDkrm34oo8Doznrqh3K-CdPhUd4ymOI-sjYh47PC4gisZckSK8SOFG-7nzxyBofyRfk9PUm5yaFsWVRFsQ"
+TOKEN = "vk1.a.HEt17KHUp8qmK7p42fTxHpw7vx6Cu4AW5vbPR0m8tWJE_0ha3WPcFGH_HfVGMFHh2G5Ep4VmKZPVqPJ7-r58qY"
 
 bot = Bot(token=TOKEN)
 
@@ -32,18 +31,6 @@ def add_link(user_id, link, link_type):
         history_db[user_id].pop(0)
     save_history(history_db)
 
-async def shorten_url(long_url: str) -> str:
-    try:
-        async with aiohttp.ClientSession() as session:
-            params = {'url': long_url}
-            async with session.get('https://clck.ru/--', params=params) as resp:
-                if resp.status == 200:
-                    return await resp.text()
-                else:
-                    return long_url
-    except:
-        return long_url
-
 def get_keyboard():
     keyboard = Keyboard(one_time=False, inline=False)
     keyboard.add(Text("Начать"), color=KeyboardButtonColor.POSITIVE)
@@ -59,8 +46,8 @@ def get_keyboard():
 
 @bot.on.message(text=["Начать", "Start", "начать", "start"])
 async def start_handler(message: Message):
-        if message.peer_type != "user":
-            return
+    if message.peer_type != "user":
+        return
     await message.answer(
         "Добро пожаловать в ХостингБот! Здесь вы сможете из фото или видео сделать короткую ссылку.\n\n"
         "Нажми «Помощь», чтобы узнать все возможности.",
@@ -69,8 +56,8 @@ async def start_handler(message: Message):
 
 @bot.on.message(text=["Помощь", "помощь", "help", "Help"])
 async def help_handler(message: Message):
-     if message.peer_type != "user":
-            return
+    if message.peer_type != "user":
+        return
     help_text = (
         "📋 **Доступные команды**\n\n"
         "🔹 **Сделать ссылку** – отправь фото, получишь короткую ссылку.\n"
@@ -84,9 +71,9 @@ async def help_handler(message: Message):
 
 @bot.on.message(text=["Благотворительность", "благотворительность", "карта", "помочь"])
 async def donate_handler(message: Message):
-     if message.peer_type != "user":
-            return
-    card_number = "2202 2081 4442 2046"  # замени на свой номер карты
+    if message.peer_type != "user":
+        return
+    card_number = "2202 2000 1234 5678"  # замени на свой номер
     await message.answer(
         f"🙏 Спасибо за поддержку!\n\n"
         f"💳 Номер карты Сбера:\n`{card_number}`\n\n"
@@ -96,8 +83,8 @@ async def donate_handler(message: Message):
 
 @bot.on.message(text=["Сделать ссылку", "сделать ссылку", "ссылка", "Ссылка"])
 async def make_link_handler(message: Message):
-     if message.peer_type != "user":
-            return
+    if message.peer_type != "user":
+        return
     await message.answer(
         "Отправь мне **фото**, и я сделаю из него короткую ссылку!",
         keyboard=get_keyboard()
@@ -105,15 +92,70 @@ async def make_link_handler(message: Message):
 
 @bot.on.message(text=["Видео ссылка", "видео ссылка", "видео"])
 async def video_link_handler(message: Message):
+    if message.peer_type != "user":
+        return
     await message.answer(
         "Отправь мне **видео**, и я сделаю из него короткую ссылку!",
         keyboard=get_keyboard()
     )
 
+@bot.on.message(text=["Мои ссылки", "мои ссылки", "история"])
+async def history_handler(message: Message):
+    if message.peer_type != "user":
+        return
+    user_id = str(message.from_id)
+    if user_id not in history_db or not history_db[user_id]:
+        await message.answer("У вас пока нет сохранённых ссылок.", keyboard=get_keyboard())
+        return
+    lines = ["📜 **Ваши последние ссылки:**\n"]
+    for idx, item in 
+     enumerate(history_db[user_id], 1):
+        lines.append(f"{idx}. {item['type']}: {item['link']}")
+    await message.answer("\n".join(lines), keyboard=get_keyboard())
+
+@bot.on.message(text=["Техподдержка", "техподдержка", "поддержка", "Помощь", "помощь"])
+async def support_handler(message: Message):
+    if message.peer_type != "user":
+        return
+    your_profile_link = "https://vk.com/yussupov95"
+    await message.answer(
+        f"📞 Связаться с поддержкой:\n"
+        f"Напиши мне в личные сообщения: {your_profile_link}\n\n"
+        f"Я отвечу как можно скорее!",
+        keyboard=get_keyboard()
+    )
+
+@bot.on.message()
+async def unknown_handler(message: Message):
+    if message.peer_type != "user":
+        return
+    await message.answer(
+        "Отлично! А теперь выбери пункт, который тебе необходим",
+        keyboard=get_keyboard()
+    )
+
+if __name__ == "__main__":
+    print("✅ Бот запущен и ждёт сообщения...")
+    bot.run_forever()
+
+async def shorten_url(long_url: str) -> str:
+    try:
+        async with aiohttp.ClientSession() as session:
+            params = {'url': long_url}
+            async with session.get('https://clck.ru/--', params=params) as resp:
+                if resp.status == 200:
+                    return await resp.text()
+                else:
+                    return long_url
+    except:
+        return long_url
+
+# Замени пустые обработчики photo_handler и video_handler на эти:
+
 @bot.on.message(attachment="photo")
 async def photo_handler(message: Message):
-     if message.peer_type != "user":
-            return
+    if message.peer_type != "user":
+        return
     photo = message.attachments[0].photo
     long_url = photo.sizes[-1].url
     short_url = await shorten_url(long_url)
@@ -128,8 +170,8 @@ async def photo_handler(message: Message):
 
 @bot.on.message(attachment="video")
 async def video_handler(message: Message):
-     if message.peer_type != "user":
-            return
+    if message.peer_type != "user":
+        return
     video = message.attachments[0].video
     if hasattr(video, 'files') and video.files:
         long_url = video.files[0].url if video.files else None
@@ -147,42 +189,4 @@ async def video_handler(message: Message):
         f"📌 Attachment:\n{video_id}",
         keyboard=get_keyboard()
     )
-
-@bot.on.message(text=["Мои ссылки", "мои ссылки", "история"])
-async def history_handler(message: Message):
-     if message.peer_type != "user":
-            return
-    user_id = str(message.from_id)
-    if user_id not in history_db or not history_db[user_id]:
-        await message.answer("У вас пока нет сохранённых ссылок.", keyboard=get_keyboard())
-        return
-    lines = ["📜 **Ваши последние ссылки:**\n"]
-    for idx, item in enumerate(history_db[user_id], 1):
-        lines.append(f"{idx}. {item['type']}: {item['link']}")
-    await message.answer("\n".join(lines), keyboard=get_keyboard())
-
-@bot.on.message(text=["Техподдержка", "техподдержка", "поддержка", "Помощь", "помощь"])
-async def support_handler(message: Message):
-     if message.peer_type != "user":
-            return
-    your_profile_link = "https://vk.com/yussupov95"  # замени на свой профиль
-    await message.answer(
-        f"📞 Связаться с поддержкой:\n"
-        f"Напиши мне в личные сообщения: {your_profile_link}\n\n"
-        f"Я отвечу как можно скорее!",
-        keyboard=get_keyboard()
-    )
-
-@bot.on.message()
-async def unknown_handler(message: Message):
-     if message.peer_type != "user":
-            return
-    await message.answer(
-        "Отлично! А теперь выбери пункт, который тебе необходим",
-        keyboard=get_keyboard()
-    )
-
-if __name__ == "__main__":
-    print("✅ Бот запущен и ждёт сообщения...")
-    bot.run_forever()
-
+    
