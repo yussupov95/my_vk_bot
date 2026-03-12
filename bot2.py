@@ -58,7 +58,7 @@ def get_keyboard():
 
 @bot.on.message(text=["Начать", "Start", "начать", "start"])
 async def start_handler(message: Message):
-    if not message.is_private:
+    if message.from_id != message.peer_id:
         return
     await message.answer(
         "Добро пожаловать в ХостингБот! Здесь вы сможете из фото или видео сделать короткую ссылку.\n\n"
@@ -68,7 +68,7 @@ async def start_handler(message: Message):
 
 @bot.on.message(text=["Помощь", "помощь", "help", "Help"])
 async def help_handler(message: Message):
-    if not message.is_private:
+    if message.from_id != message.peer_id:
         return
     help_text = (
         "📋 **Доступные команды**\n\n"
@@ -83,7 +83,7 @@ async def help_handler(message: Message):
 
 @bot.on.message(text=["Благотворительность", "благотворительность", "карта", "помочь"])
 async def donate_handler(message: Message):
-    if not message.is_private:
+    if message.from_id != message.peer_id:
         return
     card_number = "2202 2081 4442 2046"  # замени на свой номер
     await message.answer(
@@ -95,7 +95,7 @@ async def donate_handler(message: Message):
 
 @bot.on.message(text=["Сделать ссылку", "сделать ссылку", "ссылка", "Ссылка"])
 async def make_link_handler(message: Message):
-    if not message.is_private:
+    if message.from_id != message.peer_id:
         return
     await message.answer(
         "Отправь мне **фото**, и я сделаю из него короткую ссылку!",
@@ -104,7 +104,7 @@ async def make_link_handler(message: Message):
 
 @bot.on.message(text=["Видео ссылка", "видео ссылка", "видео"])
 async def video_link_handler(message: Message):
-    if not message.is_private:
+    if message.from_id != message.peer_id:
         return
     await message.answer(
         "Отправь мне **видео**, и я сделаю из него короткую ссылку!",
@@ -113,7 +113,7 @@ async def video_link_handler(message: Message):
 
 @bot.on.message(attachment="photo")
 async def photo_handler(message: Message):
-    if not message.is_private:
+    if message.from_id != message.peer_id:
         return
     photo = message.attachments[0].photo
     long_url = photo.sizes[-1].url
@@ -129,7 +129,7 @@ async def photo_handler(message: Message):
 
 @bot.on.message(attachment="video")
 async def video_handler(message: Message):
-    if not message.is_private:
+    if message.from_id != message.peer_id:
         return
     video = message.attachments[0].video
     if hasattr(video, 'files') and video.files:
@@ -151,7 +151,7 @@ async def video_handler(message: Message):
 
 @bot.on.message(text=["Мои ссылки", "мои ссылки", "история"])
 async def history_handler(message: Message):
-    if not message.is_private:
+    if message.from_id != message.peer_id:
         return
     user_id = str(message.from_id)
     if user_id not in history_db or not history_db[user_id]:
@@ -164,7 +164,7 @@ async def history_handler(message: Message):
 
 @bot.on.message(text=["Техподдержка", "техподдержка", "поддержка", "Помощь", "помощь"])
 async def support_handler(message: Message):
-    if not message.is_private:
+    if message.from_id != message.peer_id:
         return
     your_profile_link = "https://vk.com/yussupov95"  # замени на свой профиль
     await message.answer(
@@ -176,7 +176,7 @@ async def support_handler(message: Message):
 
 @bot.on.message()
 async def unknown_handler(message: Message):
-    if not message.is_private:
+    if message.from_id != message.peer_id:
         return
     await message.answer(
         "Отлично! А теперь выбери пункт, который тебе необходим",
@@ -186,6 +186,7 @@ async def unknown_handler(message: Message):
 if __name__ == "__main__":
     print("✅ Бот запущен и ждёт сообщения...")
     bot.run_forever() 
+
 
 
 
