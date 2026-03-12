@@ -54,6 +54,9 @@ def get_keyboard():
     keyboard.add(Text("Благотворительность"), color=KeyboardButtonColor.SECONDARY)
     keyboard.row()
     keyboard.add(Text("Мои ссылки"), color=KeyboardButtonColor.SECONDARY)
+    keyboard.row()
+    keyboard.add(Text("Отзывы"), color=KeyboardButtonColor.SECONDARY)
+    keyboard.add(Text("Наш чат"), color=KeyboardButtonColor.SECONDARY)
     return keyboard
 
 @bot.on.message(text=["Начать", "Start", "начать", "start"])
@@ -183,6 +186,29 @@ async def unknown_handler(message: Message):
         keyboard=get_keyboard()
     )
 
-if __name__ == "__main__":
+@bot.on.message(text=["Отзывы", "отзывы"])
+async def reviews_handler(message: Message):
+    if message.from_id != message.peer_id:
+        return
+        
+    reviews_link = "https://vk.com/wall-236560135_7"  # замени на свою ссылку
+    await message.answer(
+        f"📝 Оставьте отзыв здесь:\n{reviews_link}",
+        keyboard=get_keyboard()
+        
+    )
+
+@bot.on.message(text=["Наш чат", "наш чат", "чат"])
+async def chat_handler(message: Message):
+    if message.from_id != message.peer_id:
+        return
+    chat_link = "https://vk.me/join/V0Th6yX2jAgaZX1KMcum2W9togWPAlNCqJU="  # замени на ссылку чата
+    await message.answer(
+        f"💬 Присоединяйтесь к нашему чату:\n{chat_link}",
+        keyboard=get_keyboard()
+        
+    )
+
+    if __name__ == "__main__":
     print("✅ Бот запущен и ждёт сообщения...")
     bot.run_forever()
