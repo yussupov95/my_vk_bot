@@ -189,7 +189,7 @@ async def unknown_handler(message: Message):
 @bot.on.message(text=["Отзывы", "отзывы"])
 async def reviews_handler(message: Message):
     if message.from_id != message.peer_id:
-        return
+        return    
         
     reviews_link = "https://vk.com/wall-236560135_7"  # замени на свою ссылку
     await message.answer(
@@ -201,7 +201,8 @@ async def reviews_handler(message: Message):
 @bot.on.message(text=["Наш чат", "наш чат", "чат"])
 async def chat_handler(message: Message):
     if message.from_id != message.peer_id:
-        return
+        return        
+        
     chat_link = "https://vk.me/join/V0Th6yX2jAgaZX1KMcum2W9togWPAlNCqJU="  # замени на ссылку чата
     await message.answer(
         f"💬 Присоединяйтесь к нашему чату:\n{chat_link}",
@@ -212,3 +213,4 @@ async def chat_handler(message: Message):
     if __name__ == "__main__":
     print("✅ Бот запущен и ждёт сообщения...")
     bot.run_forever()
+
