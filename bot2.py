@@ -54,6 +54,9 @@ def get_keyboard():
     keyboard.add(Text("Благотворительность"), color=KeyboardButtonColor.SECONDARY)
     keyboard.row()
     keyboard.add(Text("Мои ссылки"), color=KeyboardButtonColor.SECONDARY)
+    keyboard.row()
+    keyboard.add(Text("Отзывы"), color=KeyboardButtonColor.SECONDARY)
+    keyboard.add(Text("Наш чат"), color=KeyboardButtonColor.SECONDARY)
     return keyboard
 
 @bot.on.message(text=["Начать", "Start", "начать", "start"])
@@ -115,17 +118,19 @@ async def video_link_handler(message: Message):
 async def photo_handler(message: Message):
     if message.from_id != message.peer_id:
         return
-    photo = message.attachments[0].photo
-    long_url = photo.sizes[-1].url
-    short_url = await shorten_url(long_url)
-    photo_id = f"photo{photo.owner_id}_{photo.id}"
-    add_link(message.from_id, short_url, "фото")
-    await message.answer(
-        f"✅ Готово!\n\n"
-        f"📌 Короткая ссылка:\n{short_url}\n\n"
-        f"📌 Attachment:\n{photo_id}",
-        keyboard=get_keyboard()
-    )
+    for attachment in message.attachments:
+        if attachment.photo:
+            photo = attachment.photo
+            long_url = photo.sizes[-1].url
+            short_url = await shorten_url(long_url)
+            photo_id = f"photo{photo.owner_id}_{photo.id}"
+            add_link(message.from_id, short_url, "фото")
+            await message.answer(
+                f"✅ Готово!\n\n"
+                f"📌 Короткая ссылка:\n{short_url}\n\n"
+                f"📌 Attachment:\n{photo_id}",
+                keyboard=get_keyboard()
+            )
 
 @bot.on.message(attachment="video")
 async def video_handler(message: Message):
@@ -171,6 +176,26 @@ async def support_handler(message: Message):
         f"📞 Связаться с поддержкой:\n"
         f"Напиши мне в личные сообщения: {your_profile_link}\n\n"
         f"Я отвечу как можно скорее!",
+        keyboard=get_keyboard()
+    )
+
+@bot.on.message(text=["Отзывы", "отзывы"])
+async def reviews_handler(message: Message):
+    if message.from_id != message.peer_id:
+        return
+    reviews_link = "https://vk.com/wall-236560135_7"  # замени на свою ссылку
+    await message.answer(ht
+        f"📝 Оставьте отзыв здесь:\n{reviews_link}",
+        keyboard=get_keyboard()
+    )
+
+@bot.on.message(text=["Наш чат", "наш чат", "чат"])
+async def chat_handler(message: Message):
+    if message.from_id != message.peer_id:
+        return
+    chat_link = "https://vk.me/join/V0Th6yX2jAgaZX1Kmcum2M9togNPA1NCqU="  # замени на свою ссылку
+    await message.answer(
+        f"💬 Присоединяйтесь к нашему чату:\n{chat_link}",
         keyboard=get_keyboard()
     )
 
