@@ -113,7 +113,7 @@ async def video_link_handler(message: Message):
 
 @bot.on.message(attachment="photo")
 async def photo_handler(message: Message):
-    if message.peer_type != "user":
+    if not message.is_private:
         return
     photo = message.attachments[0].photo
     long_url = photo.sizes[-1].url
@@ -186,5 +186,6 @@ async def unknown_handler(message: Message):
 if __name__ == "__main__":
     print("✅ Бот запущен и ждёт сообщения...")
     bot.run_forever() 
+
 
 
