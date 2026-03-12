@@ -55,7 +55,8 @@ def get_keyboard():
     keyboard.row()
     keyboard.add(Text("Мои ссылки"), color=KeyboardButtonColor.SECONDARY)
     return keyboard
-    @bot.on.message(text=["Начать", "Start", "начать", "start"])
+
+@bot.on.message(text=["Начать", "Start", "начать", "start"])
 async def start_handler(message: Message):
     if message.peer_type != "user":
         return
@@ -78,7 +79,6 @@ async def help_handler(message: Message):
         "🔹 **Техподдержка** – связь с администратором.\n"
         "🔹 **Начать** – приветствие."
     )
-   
     await message.answer(help_text, keyboard=get_keyboard())
 
 @bot.on.message(text=["Благотворительность", "благотворительность", "карта", "помочь"])
@@ -185,4 +185,4 @@ async def unknown_handler(message: Message):
 
 if __name__ == "__main__":
     print("✅ Бот запущен и ждёт сообщения...")
-    bot.run_forever()
+    bot.run_forever() 
