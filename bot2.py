@@ -111,9 +111,7 @@ async def video_link_handler(message: Message):
         keyboard=get_keyboard()
     )
 
-@bot.on.message(attachment="photo")
-async def photo_handler(message: Message):
-   @bot.on.message(attachment="photo")
+  @bot.on.message(attachment="photo")
 async def photo_handler(message: Message):
     if message.from_id != message.peer_id:
         return
@@ -190,6 +188,7 @@ async def unknown_handler(message: Message):
 if __name__ == "__main__":
     print("✅ Бот запущен и ждёт сообщения...")
     bot.run_forever() 
+
 
 
 
