@@ -70,11 +70,8 @@ def get_main_menu():
 
 def get_create_links_menu():
     keyboard = Keyboard(one_time=False, inline=False)
-    keyboard.add(Text("🖼 Фото (обычная)"), color=KeyboardButtonColor.PRIMARY)
-    keyboard.add(Text("🖼 Фото (Яндекс)"), color=KeyboardButtonColor.SECONDARY)
-    keyboard.row()
-    keyboard.add(Text("🎥 Видео (обычная)"), color=KeyboardButtonColor.PRIMARY)
-    keyboard.add(Text("🎥 Видео (Яндекс)"), color=KeyboardButtonColor.SECONDARY)
+    keyboard.add(Text("🖼 Фото"), color=KeyboardButtonColor.PRIMARY)
+    keyboard.add(Text("🎥 Видео"), color=KeyboardButtonColor.PRIMARY)
     keyboard.row()
     keyboard.add(Text("🌐 Сайт"), color=KeyboardButtonColor.PRIMARY)
     keyboard.row()
@@ -166,9 +163,8 @@ async def menu_navigation(message: Message):
         await message.answer("Оставь отзыв здесь: https://vk.com/wall-236560135_7")
     
     elif text == "💬 Наш чат":
-        await message.answer("Присоединяйся к чату: https://vk.me/join/rYfRvnGZxRAFS6AQlpM_isdVTkMGwfGAefo=")
-
-    elif text == "💰 Благотворительность":
+        await message.answer("Присоединяйся к чату: https://vk.me/join/V0Th6yX2jAgaZX1Kmcum2M9togNPA1NCqU=")
+elif text == "💰 Благотворительность":
         await message.answer(
             f"💰 Номер карты Сбера:\n`2202 2081 4442 2046`\n\n"
             f"Спасибо! Если хотите попасть в топ донатеров, отправьте чек перевода и мы добавим вас в список.",
@@ -224,21 +220,6 @@ async def menu_navigation(message: Message):
     elif text == "← Назад":
         user_menu_state[user_id] = "main"
         await message.answer("Главное меню:", keyboard=get_main_menu())
-        elif text == "🖼 Фото (Яндекс)":
-        await message.answer(
-            "📤 Загрузи фото на Яндекс.Диск по ссылке:\n"
-            "https://disk.yandex.ru/client/upload\n"
-            "После загрузки отправь мне ссылку — я её сокращу.",
-            keyboard=get_create_links_menu()
-        )
-    
-    elif text == "🎥 Видео (Яндекс)":
-        await message.answer(
-            "📤 Загрузи видео на Яндекс.Диск по ссылке:\n"
-            "https://disk.yandex.ru/client/upload\n"
-            "После загрузки отправь мне ссылку — я её сокращу.",
-            keyboard=get_create_links_menu()
-        )
 
 @bot.on.message(attachment="photo")
 async def photo_handler(message: Message):
