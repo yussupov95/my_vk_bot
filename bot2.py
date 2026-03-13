@@ -204,7 +204,7 @@ async def menu_navigation(message: Message):
             keyboard=get_info_menu()
         )
 
-elif text == "🏆 Топ донатеров":
+    elif text == "🏆 Топ донатеров":
         current_month = datetime.now().strftime("%Y-%m")
         month_data = []
         for uid, data in donations_db.items():
