@@ -13,7 +13,7 @@ HISTORY_FILE = "history.json"
 DONATIONS_FILE = "donations.json"
 
 # Твой ID ВК (замени на свой!)
-ADMIN_ID = 609908758  # 👈 ВСТАВЬ СВОЙ ID
+ADMIN_ID = 609908758
 
 # Словарь для хранения состояний меню
 user_menu_state = {}
@@ -52,7 +52,6 @@ def save_donations(donations):
         json.dump(donations, f, ensure_ascii=False, indent=2)
 
 donations_db = load_donations()
-
 
 # ====== СОКРАЩЕНИЕ ССЫЛОК ======
 async def shorten_url(long_url: str) -> str:
@@ -106,7 +105,6 @@ def get_my_menu():
     keyboard.add(Text("← Назад"), color=KeyboardButtonColor.SECONDARY)
     return keyboard
 
-
 # ====== ОБРАБОТЧИКИ ======
 @bot.on.message(text=["Начать", "Start", "начать", "start"])
 async def start_handler(message: Message):
@@ -122,19 +120,11 @@ async def start_handler(message: Message):
 async def photo_handler(message: Message):
     if message.from_id != message.peer_id:
         return
-    for attachment in message.attachments:
-        if attachment.photo:
-            photo = attachment.photo
-            long_url = photo.sizes[-1].url
-            short_url = await shorten_url(long_url)
-            photo_id = f"photo{photo.owner_id}_{photo.id}"
-            add_link(message.from_id, short_url, "фото")
-            await message.answer(
-                f"✅ Готово!\n\n"
-                f"📌 Короткая ссылка:\n{short_url}\n\n"
-                f"📌 Attachment:\n{photo_id}",
-                keyboard=get_create_links_menu()
-            )
+    # Если пользователь прислал фото без команды — просим выбрать раздел
+    await message.answer(
+        "📸 Выберите раздел в меню, чтобы создать ссылку.",
+        keyboard=get_main_menu()
+    )
 
 @bot.on.message(attachment="video")
 async def video_handler(message: Message):
@@ -158,10 +148,7 @@ async def video_handler(message: Message):
         keyboard=get_create_links_menu()
     )
 
-@bot.on.message(text=["📸 Создать ссылку", "🎥 Видео", "🖼 Фото", "🌐 Сайт", 
-                      "ℹ️ Инфо", "👤 Моё", "📝 Отзывы", "💬 Наш чат", 
-                      "💰 Благотворительность", "🏆 Топ донатеров",
-                      "📜 Мои ссылки", "📊 История", "← Назад"])
+@bot.on.message(text=["📸 Создать ссылку", "🎥 Видео", "🖼 Фото", "🌐 Сайт", "ℹ️ Инфо", "👤 Моё", "📝 Отзывы", "💬 Наш чат", "💰 Благотворительность", "🏆 Топ донатеров", "📜 Мои ссылки", "📊 История", "← Назад"])
 async def menu_navigation(message: Message):
     if message.from_id != message.peer_id:
         return
@@ -196,25 +183,23 @@ async def menu_navigation(message: Message):
     elif text == "💬 Наш чат":
         await message.answer("Присоединяйся к чату: https://vk.me/join/V0Th6yX2jAgaZX1KMcum2W9togWPAlNCqJU=")
 
-
     elif text == "💰 Благотворительность":
         await message.answer(
-        f"💰 Номер карты Сбера:\n`2202 2081 4442 2046`\n\n"
-        f"После перевода нажми кнопку ниже, чтобы сообщить мне.",
-        keyboard=(
-            Keyboard(inline=False)
-            .add(Text("✅ Я перевёл"), color=KeyboardButtonColor.POSITIVE)
-            .row()
-            .add(Text("← Назад"), color=KeyboardButtonColor.SECONDARY)
+            f"💰 Номер карты Сбера:\n`2202 2081 4442 2046`\n\n"
+            f"Спасибо! Если хотите попасть в топ донатеров, отправьте чек перевода и мы добавим вас в список.",
+            keyboard=(
+                Keyboard(inline=False)
+                .add(Text("✅ Я перевёл"), color=KeyboardButtonColor.POSITIVE)
+                .row()
+                .add(Text("← Назад"), color=KeyboardButtonColor.SECONDARY)
+            )
         )
-    )
-
+    
     elif text == "✅ Я перевёл":
         await message.answer(
-        "📸 Отправь скриншот перевода **в этот диалог**.\n"
-        "Админ проверит и добавит тебя в топ.",
-        keyboard=get_info_menu()
-    )
+            "🙏 Спасибо! Отправьте чек (скриншот перевода), и мы добавим вас в список донатеров.",
+            keyboard=get_info_menu()
+        )
     
     elif text == "🏆 Топ донатеров":
         current_month = datetime.now().strftime("%Y-%m")
@@ -255,46 +240,14 @@ async def menu_navigation(message: Message):
         user_menu_state[user_id] = "main"
         await message.answer("Главное меню:", keyboard=get_main_menu())
 
-# ====== АДМИН-КОМАНДА ======
-@bot.on.message(text=["!добавить_донат"])
-async def add_donate(message: Message):
-    if message.from_id != ADMIN_ID:
-        return
-    
-    parts = message.text.split()
-    if len(parts) != 3:
-        await message.answer("❌ Формат: !добавить_донат [id] [сумма]")
-        return
-    
-    try:
-        user_id = parts[1]
-        amount = int(parts[2])
-    except:
-        await message.answer("❌ Ошибка в формате")
-        return
-    
-    month = datetime.now().strftime("%Y-%m")
-    
-    if user_id not in donations_db:
-        donations_db[user_id] = {"total": 0, "months": {}}
-    
-    if month not in donations_db[user_id]["months"]:
-        donations_db[user_id]["months"][month] = 0
-    
-    donations_db[user_id]["months"][month] += amount
-    donations_db[user_id]["total"] += amount
-    save_donations(donations_db)
-    
-    await message.answer(f"✅ Добавлено {amount}₽ пользователю {user_id}")
-
-# ====== УБРАТЬ КНОПКИ В ЧАТЕ ======
-@bot.on.message(text=["!убрать_кнопки"])
-async def remove_keyboard(message: Message):
-    if message.peer_id == message.from_id:
+# ====== ОБРАБОТЧИК ЧЕКА ======
+@bot.on.message(text=["чек", "скриншот"])
+async def check_handler(message: Message):
+    if message.from_id != message.peer_id:
         return
     await message.answer(
-        "Кнопки убраны",
-        keyboard=Keyboard.empty()
+        "⏳ Ожидайте... Админ проверит и добавит вас в список донатеров.",
+        keyboard=get_info_menu()
     )
 
 # ====== НЕИЗВЕСТНЫЕ СООБЩЕНИЯ ======
@@ -307,25 +260,6 @@ async def unknown_handler(message: Message):
         keyboard=get_main_menu()
     )
 
-# ... предыдущий код ...
-
-@bot.on.message(text=["!clean"])
-async def clean_keyboard(message: Message):
-    # Проверяем, что команда вызвана в чате (не в личке)
-    if message.peer_id == message.from_id:
-        return  # если это личка — игнорируем
-    await message.answer(
-        "🧹 Клавиатура убрана",
-        keyboard=None
-    )
-if __name__ == "__main__":
-    print("✅ Бот запущен и ждёт сообщения...")
-    bot.run_forever()
-
-
-
-
-
-
-
-
+    if __name__ == "__main__":
+        print("✅ Бот запущен и ждёт сообщения...")
+        bot.run_forever()
