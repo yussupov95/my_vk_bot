@@ -195,28 +195,26 @@ async def menu_navigation(message: Message):
     
     elif text == "💬 Наш чат":
         await message.answer("Присоединяйся к чату: https://vk.me/join/V0Th6yX2jAgaZX1KMcum2W9togWPAlNCqJU=")
-Video.id
-video.id
 
 
     elif text == "💰 Благотворительность":
-        await message.answer(
-            f"💰 Номер карты Сбера:\n`2202 2081 4442 2046`\n\n"
-            f"После перевода нажми кнопку ниже, чтобы сообщить мне.",
-            keyboard=(
-                Keyboard(inline=False)
-                .add(Text("✅ Я перевёл"), color=KeyboardButtonColor.POSITIVE)
-                .row()
-                .add(Text("← Назад"), color=KeyboardButtonColor.SECONDARY)
-            )
+    await message.answer(
+        f"💰 Номер карты Сбера:\n`2202 2081 4442 2046`\n\n"
+        f"После перевода нажми кнопку ниже, чтобы сообщить мне.",
+        keyboard=(
+            Keyboard(inline=False)
+            .add(Text("✅ Я перевёл"), color=KeyboardButtonColor.POSITIVE)
+            .row()
+            .add(Text("← Назад"), color=KeyboardButtonColor.SECONDARY)
         )
-    
-    elif text == "✅ Я перевёл":
-        await message.answer(
-            "📸 Отправь скриншот перевода **в этот диалог**.\n"
-            "Админ проверит и добавит тебя в топ.",
-            keyboard=get_info_menu()
-        )
+    )
+
+elif text == "✅ Я перевёл":
+    await message.answer(
+        "📸 Отправь скриншот перевода **в этот диалог**.\n"
+        "Админ проверит и добавит тебя в топ.",
+        keyboard=get_info_menu()
+    )
     
     elif text == "🏆 Топ донатеров":
         current_month = datetime.now().strftime("%Y-%m")
@@ -312,4 +310,5 @@ async def unknown_handler(message: Message):
 if __name__ == "__main__":
     print("✅ Бот запущен и ждёт сообщения...")
     bot.run_forever()
+
 
