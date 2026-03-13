@@ -226,7 +226,7 @@ async def menu_navigation(message: Message):
             text += f"{i}. {name} — {amount}₽\n"
         await message.answer(text, keyboard=get_info_menu())
 
-elif text == "📜 Мои ссылки":
+    elif text == "📜 Мои ссылки":
         uid = str(message.from_id)
         if uid not in history_db or not history_db[uid]:
             await message.answer("📜 У тебя пока нет сохранённых ссылок.", keyboard=get_my_menu())
