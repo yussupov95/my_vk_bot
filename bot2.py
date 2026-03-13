@@ -199,7 +199,7 @@ async def menu_navigation(message: Message):
     
     elif text == "✅ Я перевёл":
         await message.answer(
-            "🙏 Спасибо! Отправьте чек (скриншот перевода), и мы добавим вас в список донатеров.",
+            "📸 Скиньте чек (скриншот перевода), чтобы мы убедились в платеже и добавили вас в список донатеров.",
             keyboard=get_info_menu()
         )
     
@@ -265,6 +265,7 @@ async def unknown_handler(message: Message):
 if __name__ == "__main__":
     print("✅ Бот запущен и ждёт сообщения...")
     bot.run_forever()
+
 
 
 
