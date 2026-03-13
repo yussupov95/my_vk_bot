@@ -5,7 +5,7 @@ import json
 import os
 from datetime import datetime
 
-TOKEN = "vk1.a.HEt17KHUp8qmK7p42fTxHpw7vx6Cu4AW5vbPR0m8tWJE_0ha3WPcFGH_HfVGMFHh2G5Ep4VmKZPVqPJ7-r58qY"
+TOKEN = "vk1.a.IShdbvc7y-WNl-laMuw1g-vYEwLHjNk-nPqHZSsPbjC0Ul-dYBVjPyeur0z1i4L5r-XARvPy3p38cedqN38bFvUKqM-uRf8F8AOlJcsqe5r30NWWxep87JyZOw8xwLXXjtr5VDkrm34oo8Doznrqh3K-CdPhUd4ymOI-sjYh47PC4gisZckSK8SOFG-7nzxyBofyRfk9PUm5yaFsWVRFsQ"
 
 bot = Bot(token=TOKEN)
 
@@ -48,6 +48,7 @@ def save_donations(donations):
         json.dump(donations, f, ensure_ascii=False, indent=2)
 
 donations_db = load_donations()
+
 async def shorten_url(long_url: str) -> str:
     try:
         async with aiohttp.ClientSession() as session:
@@ -100,6 +101,7 @@ def get_my_menu():
     keyboard.row()
     keyboard.add(Text("← Назад"), color=KeyboardButtonColor.SECONDARY)
     return keyboard
+
 @bot.on.message(text=["Начать", "Start", "начать", "start"])
 async def start_handler(message: Message):
     if message.from_id != message.peer_id:
@@ -151,7 +153,7 @@ async def menu_navigation(message: Message):
     elif text == "👤 Моё":
         user_menu_state[user_id] = "my"
         await message.answer("Твои данные:", keyboard=get_my_menu())
-    
+
     elif text == "🖼 Фото (обычная)":
         user_menu_state[user_id] = "waiting_photo"
         await message.answer("Отправь мне фото, и я сделаю из него короткую ссылку!")
@@ -174,7 +176,7 @@ async def menu_navigation(message: Message):
             "После загрузки отправь мне ссылку — я её сокращу.",
             keyboard=get_create_links_menu()
         )
-    
+
     elif text == "🌐 Сайт":
         await message.answer("Отправь ссылку на сайт, и я её сокращу!")
     
@@ -183,7 +185,8 @@ async def menu_navigation(message: Message):
     
     elif text == "💬 Наш чат":
         await message.answer("Присоединяйся к чату: https://vk.me/join/V0Th6yX2jAgaZX1Kmcum2M9togNPA1NCqU=")
-elif text == "💰 Благотворительность":
+
+    elif text == "💰 Благотворительность":
         await message.answer(
             f"💰 Номер карты Сбера:\n`2202 2081 4442 2046`\n\n"
             f"Спасибо! Если хотите попасть в топ донатеров, отправьте чек перевода и мы добавим вас в список.",
@@ -200,7 +203,7 @@ elif text == "💰 Благотворительность":
             "📸 Скиньте чек (скриншот перевода), чтобы мы убедились в платеже и добавили вас в список донатеров.",
             keyboard=get_info_menu()
         )
-    
+
     elif text == "🏆 Топ донатеров":
         current_month = datetime.now().strftime("%Y-%m")
         month_data = []
@@ -222,7 +225,7 @@ elif text == "💰 Благотворительность":
                 name = f"Пользователь {uid}"
             text += f"{i}. {name} — {amount}₽\n"
         await message.answer(text, keyboard=get_info_menu())
-    
+
     elif text == "📜 Мои ссылки":
         uid = str(message.from_id)
         if uid not in history_db or not history_db[uid]:
@@ -276,6 +279,37 @@ async def check_handler(message: Message):
         keyboard=get_info_menu()
     )
 
+@bot.on.message(text=["!топ"])
+async def add_donate(message: Message):
+    if message.from_id != ADMIN_ID:
+        return
+    
+    parts = message.text.split()
+    if len(parts) != 3:
+    await message.answer("❌ Формат: !топ [id] [сумма]")
+    return
+
+try:
+    user_id = parts[1]
+    amount = int(parts[2])
+except:
+    await message.answer("❌ Ошибка в формате")
+    return
+
+month = datetime.now().strftime("%Y-%m")
+
+if user_id not in donations_db:
+    donations_db[user_id] = {"total": 0, "months": {}}
+
+if month not in donations_db[user_id]["months"]:
+    donations_db[user_id]["months"][month] = 0
+
+donations_db[user_id]["months"][month] += amount
+donations_db[user_id]["total"] += amount
+save_donations(donations_db)
+
+await message.answer(f"✅ Добавлено {amount}₽ пользователю {user_id}")
+
 @bot.on.message()
 async def unknown_handler(message: Message):
     if message.from_id != message.peer_id:
@@ -284,36 +318,6 @@ async def unknown_handler(message: Message):
         "Выбери раздел в меню:",
         keyboard=get_main_menu()
     )
-@bot.on.message(text=["!добавить_донат"])
-async def add_donate(message: Message):
-    if message.from_id != ADMIN_ID:
-        return
-    
-    parts = message.text.split()
-    if len(parts) != 3:
-        await message.answer("❌ Формат: !добавить_донат [id] [сумма]")
-        return
-    
-    try:
-        user_id = parts[1]
-        amount = int(parts[2])
-    except:
-        await message.answer("❌ Ошибка в формате")
-        return
-    
-    month = datetime.now().strftime("%Y-%m")
-    
-    if user_id not in donations_db:
-        donations_db[user_id] = {"total": 0, "months": {}}
-    
-    if month not in donations_db[user_id]["months"]:
-        donations_db[user_id]["months"][month] = 0
-    
-    donations_db[user_id]["months"][month] += amount
-    donations_db[user_id]["total"] += amount
-    save_donations(donations_db)
-    
-    await message.answer(f"✅ Добавлено {amount}₽ пользователю {user_id}")
 
 if __name__ == "__main__":
     print("✅ Бот запущен и ждёт сообщения...")
