@@ -186,6 +186,18 @@ async def menu_navigation(message: Message):
     elif text == "💬 Наш чат":
         await message.answer("Присоединяйся к чату: https://vk.me/join/rYfRvnGZxRAFS6AQlpM_isdVTkMGwfGAefo=")
 
+    elif text == "💰 Благотворительность":
+        await message.answer(
+            f"💰 Номер карты Сбера:\n`2202 2081 4442 2046`\n\n"
+            f"Спасибо! Если хотите попасть в топ донатеров, отправьте чек перевода и мы добавим вас в список.",
+            keyboard=(
+                Keyboard(inline=False)
+                .add(Text("✅ Я перевёл"), color=KeyboardButtonColor.POSITIVE)
+                .row()
+                .add(Text("← Назад"), color=KeyboardButtonColor.SECONDARY)
+            )
+        )
+
 @bot.on.message(text=["Начать", "Start", "начать", "start"])
 async def start_handler(message: Message):
     if message.from_id != message.peer_id:
