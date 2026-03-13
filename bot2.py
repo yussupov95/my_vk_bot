@@ -284,6 +284,7 @@ async def unknown_handler(message: Message):
         "Выбери раздел в меню:",
         keyboard=get_main_menu()
     )
+    
 @bot.on.message(text=["!добавить_донат"])
 async def add_donate(message: Message):
     if message.from_id != ADMIN_ID:
