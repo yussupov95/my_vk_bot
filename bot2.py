@@ -48,6 +48,7 @@ def save_donations(donations):
         json.dump(donations, f, ensure_ascii=False, indent=2)
 
 donations_db = load_donations()
+
 async def shorten_url(long_url: str) -> str:
     try:
         async with aiohttp.ClientSession() as session:
@@ -100,6 +101,7 @@ def get_my_menu():
     keyboard.row()
     keyboard.add(Text("← Назад"), color=KeyboardButtonColor.SECONDARY)
     return keyboard
+
 @bot.on.message(text=["Начать", "Start", "начать", "start"])
 async def start_handler(message: Message):
     if message.from_id != message.peer_id:
@@ -151,7 +153,7 @@ async def menu_navigation(message: Message):
     elif text == "👤 Моё":
         user_menu_state[user_id] = "my"
         await message.answer("Твои данные:", keyboard=get_my_menu())
-    
+
     elif text == "🖼 Фото (обычная)":
         user_menu_state[user_id] = "waiting_photo"
         await message.answer("Отправь мне фото, и я сделаю из него короткую ссылку!")
@@ -174,7 +176,7 @@ async def menu_navigation(message: Message):
             "После загрузки отправь мне ссылку — я её сокращу.",
             keyboard=get_create_links_menu()
         )
-    
+
     elif text == "🌐 Сайт":
         await message.answer("Отправь ссылку на сайт, и я её сокращу!")
     
@@ -183,6 +185,7 @@ async def menu_navigation(message: Message):
     
     elif text == "💬 Наш чат":
         await message.answer("Присоединяйся к чату: https://vk.me/join/V0Th6yX2jAgaZX1Kmcum2M9togNPA1NCqU=")
+
     elif text == "💰 Благотворительность":
         await message.answer(
             f"💰 Номер карты Сбера:\n`2202 2081 4442 2046`\n\n"
@@ -200,8 +203,8 @@ async def menu_navigation(message: Message):
             "📸 Скиньте чек (скриншот перевода), чтобы мы убедились в платеже и добавили вас в список донатеров.",
             keyboard=get_info_menu()
         )
-    
-    elif text == "🏆 Топ донатеров":
+
+elif text == "🏆 Топ донатеров":
         current_month = datetime.now().strftime("%Y-%m")
         month_data = []
         for uid, data in donations_db.items():
@@ -222,8 +225,8 @@ async def menu_navigation(message: Message):
                 name = f"Пользователь {uid}"
             text += f"{i}. {name} — {amount}₽\n"
         await message.answer(text, keyboard=get_info_menu())
-    
-    elif text == "📜 Мои ссылки":
+
+elif text == "📜 Мои ссылки":
         uid = str(message.from_id)
         if uid not in history_db or not history_db[uid]:
             await message.answer("📜 У тебя пока нет сохранённых ссылок.", keyboard=get_my_menu())
@@ -276,31 +279,46 @@ async def check_handler(message: Message):
         keyboard=get_info_menu()
     )
 
-# ====== АДМИН-КОМАНДА ======
 @bot.on.message(text=["!топ"])
 async def add_donate(message: Message):
     if message.from_id != ADMIN_ID:
         return
+    
     parts = message.text.split()
     if len(parts) != 3:
         await message.answer("❌ Формат: !топ [id] [сумма]")
         return
+    
     try:
         user_id = parts[1]
         amount = int(parts[2])
     except:
         await message.answer("❌ Ошибка в формате")
         return
+    
     month = datetime.now().strftime("%Y-%m")
+    
     if user_id not in donations_db:
         donations_db[user_id] = {"total": 0, "months": {}}
+    
     if month not in donations_db[user_id]["months"]:
         donations_db[user_id]["months"][month] = 0
+    
     donations_db[user_id]["months"][month] += amount
     donations_db[user_id]["total"] += amount
     save_donations(donations_db)
+    
     await message.answer(f"✅ Добавлено {amount}₽ пользователю {user_id}")
-   
-    if __name__ == "__main__":
-        print("✅ Бот запущен и ждёт сообщения...")
-        bot.run_forever()
+
+@bot.on.message()
+async def unknown_handler(message: Message):
+    if message.from_id != message.peer_id:
+        return
+    await message.answer(
+        "Выбери раздел в меню:",
+        keyboard=get_main_menu()
+    )
+
+if __name__ == "__main__":
+    print("✅ Бот запущен и ждёт сообщения...")
+    bot.run_forever()
