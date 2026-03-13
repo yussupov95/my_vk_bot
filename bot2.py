@@ -316,12 +316,13 @@ async def clean_keyboard(message: Message):
         return
     await message.answer(
         "🧹 Клавиатура очищена",
-        keyboard=Keyboard.empty()
+        keyboard=Keyboard.None()
     )
 
 if __name__ == "__main__":
     print("✅ Бот запущен и ждёт сообщения...")
     bot.run_forever()
+
 
 
 
