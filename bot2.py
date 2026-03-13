@@ -70,8 +70,11 @@ def get_main_menu():
 
 def get_create_links_menu():
     keyboard = Keyboard(one_time=False, inline=False)
-    keyboard.add(Text("🖼 Фото"), color=KeyboardButtonColor.PRIMARY)
-    keyboard.add(Text("🎥 Видео"), color=KeyboardButtonColor.PRIMARY)
+    keyboard.add(Text("🖼 Фото (обычная)"), color=KeyboardButtonColor.PRIMARY)
+    keyboard.add(Text("🖼 Фото (Яндекс)"), color=KeyboardButtonColor.SECONDARY)
+    keyboard.row()
+    keyboard.add(Text("🎥 Видео (обычная)"), color=KeyboardButtonColor.PRIMARY)
+    keyboard.add(Text("🎥 Видео (Яндекс)"), color=KeyboardButtonColor.SECONDARY)
     keyboard.row()
     keyboard.add(Text("🌐 Сайт"), color=KeyboardButtonColor.PRIMARY)
     keyboard.row()
@@ -221,6 +224,21 @@ async def menu_navigation(message: Message):
     elif text == "← Назад":
         user_menu_state[user_id] = "main"
         await message.answer("Главное меню:", keyboard=get_main_menu())
+        elif text == "🖼 Фото (Яндекс)":
+        await message.answer(
+            "📤 Загрузи фото на Яндекс.Диск по ссылке:\n"
+            "https://disk.yandex.ru/client/upload\n"
+            "После загрузки отправь мне ссылку — я её сокращу.",
+            keyboard=get_create_links_menu()
+        )
+    
+    elif text == "🎥 Видео (Яндекс)":
+        await message.answer(
+            "📤 Загрузи видео на Яндекс.Диск по ссылке:\n"
+            "https://disk.yandex.ru/client/upload\n"
+            "После загрузки отправь мне ссылку — я её сокращу.",
+            keyboard=get_create_links_menu()
+        )
 
 @bot.on.message(attachment="photo")
 async def photo_handler(message: Message):
