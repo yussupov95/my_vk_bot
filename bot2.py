@@ -7,7 +7,6 @@ from datetime import datetime
 
 TOKEN = "vk1.a.IShdbvc7y-WNl-laMuw1g-vYEwLHjNk-nPqHZSsPbjC0Ul-dYBVjPyeur0z1i4L5r-XARvPy3p38cedqN38bFvUKqM-uRf8F8AOlJcsqe5r30NWWxep87JyZOw8xwLXXjtr5VDkrm34oo8Doznrqh3K-CdPhUd4ymOI-sjYh47PC4gisZckSK8SOFG-7nzxyBofyRfk9PUm5yaFsWVRFsQ"
 
-
 bot = Bot(token=TOKEN)
 
 HISTORY_FILE = "history.json"
@@ -275,4 +274,3 @@ async def unknown_handler(message: Message):
     if __name__ == "__main__":
         print("✅ Бот запущен и ждёт сообщения...")
         bot.run_forever()
-
