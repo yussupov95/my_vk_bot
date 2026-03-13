@@ -286,8 +286,8 @@ async def add_donate(message: Message):
     
     parts = message.text.split()
     if len(parts) != 3:
-    await message.answer("❌ Формат: !топ [id] [сумма]")
-    return
+        await message.answer("❌ Формат: !топ [id] [сумма]")
+        return
 
 try:
     user_id = parts[1]
