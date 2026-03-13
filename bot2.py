@@ -164,7 +164,7 @@ async def menu_navigation(message: Message):
     
     elif text == "💬 Наш чат":
         await message.answer("Присоединяйся к чату: https://vk.me/join/V0Th6yX2jAgaZX1Kmcum2M9togNPA1NCqU=")
-elif text == "💰 Благотворительность":
+    elif text == "💰 Благотворительность":
         await message.answer(
             f"💰 Номер карты Сбера:\n`2202 2081 4442 2046`\n\n"
             f"Спасибо! Если хотите попасть в топ донатеров, отправьте чек перевода и мы добавим вас в список.",
