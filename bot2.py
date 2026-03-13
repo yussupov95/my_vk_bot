@@ -153,7 +153,7 @@ async def menu_navigation(message: Message):
     elif text == "👤 Моё":
         user_menu_state[user_id] = "my"
         await message.answer("Твои данные:", keyboard=get_my_menu())
-
+    
     elif text == "🖼 Фото (обычная)":
         user_menu_state[user_id] = "waiting_photo"
         await message.answer("Отправь мне фото, и я сделаю из него короткую ссылку!")
@@ -176,7 +176,59 @@ async def menu_navigation(message: Message):
             "После загрузки отправь мне ссылку — я её сокращу.",
             keyboard=get_create_links_menu()
         )
+    
+    elif text == "🌐 Сайт":
+        await message.answer("Отправь ссылку на сайт, и я её сокращу!")
+    
+    elif text == "📝 Отзывы":
+        await message.answer("Оставь отзыв здесь: https://vk.com/wall-236560135_7")
+    
+    elif text == "💬 Наш чат":
+        await message.answer("Присоединяйся к чату: https://vk.me/join/rYfRvnGZxRAFS6AQlpM_isdVTkMGwfGAefo=")
 
+@bot.on.message(text=["📸 Создать ссылку", "🎥 Видео", "🖼 Фото (обычная)", "🖼 Фото (Яндекс)", "🎥 Видео (обычная)", "🎥 Видео (Яндекс)", "🌐 Сайт", "ℹ️ Инфо", "👤 Моё", "📝 Отзывы", "💬 Наш чат", "💰 Благотворительность", "🏆 Топ донатеров", "📜 Мои ссылки", "📊 История", "← Назад"])
+async def menu_navigation(message: Message):
+    if message.from_id != message.peer_id:
+        return
+    
+    user_id = message.from_id
+    text = message.text
+    
+    if text == "📸 Создать ссылку":
+        user_menu_state[user_id] = "create"
+        await message.answer("Выбери тип ссылки:", keyboard=get_create_links_menu())
+    
+    elif text == "ℹ️ Инфо":
+        user_menu_state[user_id] = "info"
+        await message.answer("Информация:", keyboard=get_info_menu())
+    
+    elif text == "👤 Моё":
+        user_menu_state[user_id] = "my"
+        await message.answer("Твои данные:", keyboard=get_my_menu())
+    
+    elif text == "🖼 Фото (обычная)":
+        user_menu_state[user_id] = "waiting_photo"
+        await message.answer("Отправь мне фото, и я сделаю из него короткую ссылку!")
+    
+    elif text == "🖼 Фото (Яндекс)":
+        await message.answer(
+            "📤 Загрузи фото на Яндекс.Диск по ссылке:\n"
+            "https://disk.yandex.ru/client/upload\n"
+            "После загрузки отправь мне ссылку — я её сокращу.",
+            keyboard=get_create_links_menu()
+        )
+    
+    elif text == "🎥 Видео (обычная)":
+        await message.answer("Отправь мне видео, и я сделаю из него короткую ссылку!")
+    
+    elif text == "🎥 Видео (Яндекс)":
+        await message.answer(
+            "📤 Загрузи видео на Яндекс.Диск по ссылке:\n"
+            "https://disk.yandex.ru/client/upload\n"
+            "После загрузки отправь мне ссылку — я её сокращу.",
+            keyboard=get_create_links_menu()
+        )
+    
     elif text == "🌐 Сайт":
         await message.answer("Отправь ссылку на сайт, и я её сокращу!")
     
@@ -203,7 +255,7 @@ async def menu_navigation(message: Message):
             "📸 Скиньте чек (скриншот перевода), чтобы мы убедились в платеже и добавили вас в список донатеров.",
             keyboard=get_info_menu()
         )
-
+    
     elif text == "🏆 Топ донатеров":
         current_month = datetime.now().strftime("%Y-%m")
         month_data = []
@@ -226,7 +278,7 @@ async def menu_navigation(message: Message):
             text += f"{i}. {name} — {amount}₽\n"
         await message.answer(text, keyboard=get_info_menu())
 
-    elif text == "📜 Мои ссылки":
+elif text == "📜 Мои ссылки":
         uid = str(message.from_id)
         if uid not in history_db or not history_db[uid]:
             await message.answer("📜 У тебя пока нет сохранённых ссылок.", keyboard=get_my_menu())
@@ -283,32 +335,25 @@ async def check_handler(message: Message):
 async def add_donate(message: Message):
     if message.from_id != ADMIN_ID:
         return
-    
     parts = message.text.split()
     if len(parts) != 3:
         await message.answer("❌ Формат: !топ [id] [сумма]")
         return
-
-try:
-    user_id = parts[1]
-    amount = int(parts[2])
-except:
-    await message.answer("❌ Ошибка в формате")
-    return
-
-month = datetime.now().strftime("%Y-%m")
-
-if user_id not in donations_db:
-    donations_db[user_id] = {"total": 0, "months": {}}
-
-if month not in donations_db[user_id]["months"]:
-    donations_db[user_id]["months"][month] = 0
-
-donations_db[user_id]["months"][month] += amount
-donations_db[user_id]["total"] += amount
-save_donations(donations_db)
-
-await message.answer(f"✅ Добавлено {amount}₽ пользователю {user_id}")
+    try:
+        user_id = parts[1]
+        amount = int(parts[2])
+    except:
+        await message.answer("❌ Ошибка в формате")
+        return
+    month = datetime.now().strftime("%Y-%m")
+    if user_id not in donations_db:
+        donations_db[user_id] = {"total": 0, "months": {}}
+    if month not in donations_db[user_id]["months"]:
+        donations_db[user_id]["months"][month] = 0
+    donations_db[user_id]["months"][month] += amount
+    donations_db[user_id]["total"] += amount
+    save_donations(donations_db)
+    await message.answer(f"✅ Добавлено {amount}₽ пользователю {user_id}")
 
 @bot.on.message()
 async def unknown_handler(message: Message):
