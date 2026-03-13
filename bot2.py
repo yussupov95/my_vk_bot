@@ -300,3 +300,7 @@ async def add_donate(message: Message):
     donations_db[user_id]["total"] += amount
     save_donations(donations_db)
     await message.answer(f"✅ Добавлено {amount}₽ пользователю {user_id}")
+   
+    if __name__ == "__main__":
+        print("✅ Бот запущен и ждёт сообщения...")
+        bot.run_forever()
