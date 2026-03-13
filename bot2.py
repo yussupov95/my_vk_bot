@@ -12,13 +12,10 @@ bot = Bot(token=TOKEN)
 HISTORY_FILE = "history.json"
 DONATIONS_FILE = "donations.json"
 
-# Твой ID ВК (замени на свой!)
 ADMIN_ID = 609908758
 
-# Словарь для хранения состояний меню
 user_menu_state = {}
 
-# ====== ИСТОРИЯ ССЫЛОК ======
 def load_history():
     if os.path.exists(HISTORY_FILE):
         with open(HISTORY_FILE, "r", encoding="utf-8") as f:
@@ -40,7 +37,6 @@ def add_link(user_id, link, link_type):
         history_db[user_id].pop(0)
     save_history(history_db)
 
-# ====== ДОНАТЫ ======
 def load_donations():
     if os.path.exists(DONATIONS_FILE):
         with open(DONATIONS_FILE, "r", encoding="utf-8") as f:
@@ -54,7 +50,6 @@ def save_donations(donations):
 donations_db = load_donations()
 
 
-# ====== СОКРАЩЕНИЕ ССЫЛОК ======
 async def shorten_url(long_url: str) -> str:
     try:
         async with aiohttp.ClientSession() as session:
@@ -67,7 +62,6 @@ async def shorten_url(long_url: str) -> str:
     except:
         return long_url
 
-# ====== МЕНЮ ======
 def get_main_menu():
     keyboard = Keyboard(one_time=False, inline=False)
     keyboard.add(Text("📸 Создать ссылку"), color=KeyboardButtonColor.PRIMARY)
@@ -107,7 +101,6 @@ def get_my_menu():
     return keyboard
 
 
-# ====== ОБРАБОТЧИКИ ======
 @bot.on.message(text=["Начать", "Start", "начать", "start"])
 async def start_handler(message: Message):
     if message.from_id != message.peer_id:
@@ -117,37 +110,6 @@ async def start_handler(message: Message):
         "Добро пожаловать в ХостингБот! Выбери раздел:",
         keyboard=get_main_menu()
     )
-
-@bot.on.message(attachment="photo")
-async def photo_handler(message: Message):
-    if message.from_id != message.peer_id:
-        return
-    
-    user_id = message.from_id
-    # Проверяем, ждёт ли бот фото от этого пользователя
-    if user_menu_state.get(user_id) == "waiting_photo":
-        # Обрабатываем фото
-        for attachment in message.attachments:
-            if attachment.photo:
-                photo = attachment.photo
-                long_url = photo.sizes[-1].url
-                short_url = await shorten_url(long_url)
-                photo_id = f"photo{photo.owner_id}_{photo.id}"
-                add_link(message.from_id, short_url, "фото")
-                await message.answer(
-                    f"✅ Готово!\n\n"
-                    f"📌 Короткая ссылка:\n{short_url}\n\n"
-                    f"📌 Attachment:\n{photo_id}",
-                    keyboard=get_create_links_menu()
-                )
-        # Сбрасываем состояние
-        user_menu_state[user_id] = "create"
-    else:
-        # Если фото прислано без команды
-        await message.answer(
-            "📸 Сначала нажми «Фото» в меню «Создать ссылку».",
-            keyboard=get_main_menu()
-        )
 
 @bot.on.message(attachment="video")
 async def video_handler(message: Message):
@@ -264,7 +226,33 @@ async def menu_navigation(message: Message):
         user_menu_state[user_id] = "main"
         await message.answer("Главное меню:", keyboard=get_main_menu())
 
-# ====== ОБРАБОТЧИК ЧЕКА ======
+@bot.on.message(attachment="photo")
+async def photo_handler(message: Message):
+    if message.from_id != message.peer_id:
+        return
+    
+    user_id = message.from_id
+    if user_menu_state.get(user_id) == "waiting_photo":
+        for attachment in message.attachments:
+            if attachment.photo:
+                photo = attachment.photo
+                long_url = photo.sizes[-1].url
+                short_url = await shorten_url(long_url)
+                photo_id = f"photo{photo.owner_id}_{photo.id}"
+                add_link(message.from_id, short_url, "фото")
+                await message.answer(
+                    f"✅ Готово!\n\n"
+                    f"📌 Короткая ссылка:\n{short_url}\n\n"
+                    f"📌 Attachment:\n{photo_id}",
+                    keyboard=get_create_links_menu()
+                )
+        user_menu_state[user_id] = "create"
+    else:
+        await message.answer(
+            "📸 Сначала нажми «Фото» в меню «Создать ссылку».",
+            keyboard=get_main_menu()
+        )
+
 @bot.on.message(text=["чек", "скриншот"])
 async def check_handler(message: Message):
     if message.from_id != message.peer_id:
@@ -274,7 +262,6 @@ async def check_handler(message: Message):
         keyboard=get_info_menu()
     )
 
-# ====== НЕИЗВЕСТНЫЕ СООБЩЕНИЯ ======
 @bot.on.message()
 async def unknown_handler(message: Message):
     if message.from_id != message.peer_id:
@@ -284,14 +271,6 @@ async def unknown_handler(message: Message):
         keyboard=get_main_menu()
     )
 
-if __name__ == "__main__":
-    print("✅ Бот запущен и ждёт сообщения...")
-    bot.run_forever()
-
-
-
-
-
-
-
-
+    if __name__ == "__main__":
+        print("✅ Бот запущен и ждёт сообщения...")
+        bot.run_forever()
