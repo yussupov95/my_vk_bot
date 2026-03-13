@@ -240,8 +240,8 @@ async def menu_navigation(message: Message):
         await message.answer("📊 История (в разработке)", keyboard=get_my_menu())
     
     elif text == "← Назад":
-        user_menu_state[user_id] = "main"
-        await message.answer("Главное меню:", keyboard=get_main_menu())
+            user_menu_state[user_id] = "main"
+            await message.answer("Главное меню:", keyboard=get_main_menu())
 
 @bot.on.message(attachment="photo")
 async def photo_handler(message: Message):
