@@ -171,6 +171,7 @@ async def menu_navigation(message: Message):
         await message.answer("Твои данные:", keyboard=get_my_menu())
     
     elif text == "🖼 Фото":
+        user_menu_state[user_id] = "waiting_photo"
         await message.answer("Отправь мне фото, и я сделаю из него короткую ссылку!")
     
     elif text == "🎥 Видео":
@@ -265,6 +266,7 @@ async def unknown_handler(message: Message):
 if __name__ == "__main__":
     print("✅ Бот запущен и ждёт сообщения...")
     bot.run_forever()
+
 
 
 
