@@ -307,19 +307,21 @@ async def unknown_handler(message: Message):
         keyboard=get_main_menu()
     )
 
-
 # ... предыдущий код ...
 
 @bot.on.message(text=["!clean"])
 async def clean_keyboard(message: Message):
+    # Проверяем, что команда вызвана в чате (не в личке)
+    if message.peer_id == message.from_id:
+        return  # если это личка — игнорируем
     await message.answer(
-        "🧹 Клавиатура очищена",
+        "🧹 Клавиатура убрана",
         keyboard=None
     )
-
 if __name__ == "__main__":
     print("✅ Бот запущен и ждёт сообщения...")
     bot.run_forever()
+
 
 
 
