@@ -163,7 +163,7 @@ async def menu_navigation(message: Message):
         await message.answer("Оставь отзыв здесь: https://vk.com/wall-236560135_7")
     
     elif text == "💬 Наш чат":
-        await message.answer("Присоединяйся к чату: https://vk.me/join/V0Th6yX2jAgaZX1KMcum2W9togWPAlNCqJU=")
+        await message.answer("Присоединяйся к чату: https://vk.me/join/rYfRvnGZxRAFS6AQlpM_isdVTkMGwfGAefo=")
 
     elif text == "💰 Благотворительность":
         await message.answer(
