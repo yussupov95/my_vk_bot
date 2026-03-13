@@ -307,9 +307,22 @@ async def unknown_handler(message: Message):
         keyboard=get_main_menu()
     )
 
+
+# ... предыдущий код ...
+
+@bot.on.message(text=["!clean"])
+async def clean_keyboard(message: Message):
+    if message.peer_id == message.from_id:
+        return
+    await message.answer(
+        "🧹 Клавиатура очищена",
+        keyboard=Keyboard.empty()
+    )
+
 if __name__ == "__main__":
     print("✅ Бот запущен и ждёт сообщения...")
     bot.run_forever()
+
 
 
 
