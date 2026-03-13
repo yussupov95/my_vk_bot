@@ -186,6 +186,38 @@ async def menu_navigation(message: Message):
     elif text == "💬 Наш чат":
         await message.answer("Присоединяйся к чату: https://vk.me/join/rYfRvnGZxRAFS6AQlpM_isdVTkMGwfGAefo=")
 
+@bot.on.message(text=["Начать", "Start", "начать", "start"])
+async def start_handler(message: Message):
+    if message.from_id != message.peer_id:
+        return
+    user_menu_state[message.from_id] = "main"
+    await message.answer(
+        "Добро пожаловать в ХостингБот! Выбери раздел:",
+        keyboard=get_main_menu()
+    )
+
+@bot.on.message(attachment="video")
+async def video_handler(message: Message):
+    if message.from_id != message.peer_id:
+        return
+    video = message.attachments[0].video
+    if hasattr(video, 'files') and video.files:
+        long_url = video.files[0].url if video.files else None
+    else:
+        long_url = f"https://vk.com/video{video.owner_id}_{video.id}"
+    if long_url:
+        short_url = await shorten_url(long_url)
+    else:
+        short_url = "Не удалось получить ссылку"
+    video_id = f"video{video.owner_id}_{video.id}"
+    add_link(message.from_id, short_url, "видео")
+    await message.answer(
+        f"✅ Готово!\n\n"
+        f"📌 Короткая ссылка:\n{short_url}\n\n"
+        f"📌 Attachment:\n{video_id}",
+        keyboard=get_create_links_menu()
+    )
+
 @bot.on.message(text=["📸 Создать ссылку", "🎥 Видео", "🖼 Фото (обычная)", "🖼 Фото (Яндекс)", "🎥 Видео (обычная)", "🎥 Видео (Яндекс)", "🌐 Сайт", "ℹ️ Инфо", "👤 Моё", "📝 Отзывы", "💬 Наш чат", "💰 Благотворительность", "🏆 Топ донатеров", "📜 Мои ссылки", "📊 История", "← Назад"])
 async def menu_navigation(message: Message):
     if message.from_id != message.peer_id:
@@ -330,30 +362,6 @@ async def check_handler(message: Message):
         "⏳ Ожидайте... Админ проверит и добавит вас в список донатеров.",
         keyboard=get_info_menu()
     )
-
-@bot.on.message(text=["!топ"])
-async def add_donate(message: Message):
-    if message.from_id != ADMIN_ID:
-        return
-    parts = message.text.split()
-    if len(parts) != 3:
-        await message.answer("❌ Формат: !топ [id] [сумма]")
-        return
-    try:
-        user_id = parts[1]
-        amount = int(parts[2])
-    except:
-        await message.answer("❌ Ошибка в формате")
-        return
-    month = datetime.now().strftime("%Y-%m")
-    if user_id not in donations_db:
-        donations_db[user_id] = {"total": 0, "months": {}}
-    if month not in donations_db[user_id]["months"]:
-        donations_db[user_id]["months"][month] = 0
-    donations_db[user_id]["months"][month] += amount
-    donations_db[user_id]["total"] += amount
-    save_donations(donations_db)
-    await message.answer(f"✅ Добавлено {amount}₽ пользователю {user_id}")
 
 @bot.on.message()
 async def unknown_handler(message: Message):
