@@ -70,8 +70,11 @@ def get_main_menu():
 
 def get_create_links_menu():
     keyboard = Keyboard(one_time=False, inline=False)
-    keyboard.add(Text("🖼 Фото"), color=KeyboardButtonColor.PRIMARY)
-    keyboard.add(Text("🎥 Видео"), color=KeyboardButtonColor.PRIMARY)
+    keyboard.add(Text("🖼 Фото (обычная)"), color=KeyboardButtonColor.PRIMARY)
+    keyboard.add(Text("🖼 Фото (Яндекс)"), color=KeyboardButtonColor.SECONDARY)
+    keyboard.row()
+    keyboard.add(Text("🎥 Видео (обычная)"), color=KeyboardButtonColor.PRIMARY)
+    keyboard.add(Text("🎥 Видео (Яндекс)"), color=KeyboardButtonColor.SECONDARY)
     keyboard.row()
     keyboard.add(Text("🌐 Сайт"), color=KeyboardButtonColor.PRIMARY)
     keyboard.row()
@@ -129,7 +132,7 @@ async def video_handler(message: Message):
         keyboard=get_create_links_menu()
     )
 
-@bot.on.message(text=["📸 Создать ссылку", "🎥 Видео", "🖼 Фото", "🌐 Сайт", "ℹ️ Инфо", "👤 Моё", "📝 Отзывы", "💬 Наш чат", "💰 Благотворительность", "🏆 Топ донатеров", "📜 Мои ссылки", "📊 История", "← Назад"])
+@bot.on.message(text=["📸 Создать ссылку", "🎥 Видео", "🖼 Фото (обычная)", "🖼 Фото (Яндекс)", "🎥 Видео (обычная)", "🎥 Видео (Яндекс)", "🌐 Сайт", "ℹ️ Инфо", "👤 Моё", "📝 Отзывы", "💬 Наш чат", "💰 Благотворительность", "🏆 Топ донатеров", "📜 Мои ссылки", "📊 История", "← Назад"])
 async def menu_navigation(message: Message):
     if message.from_id != message.peer_id:
         return
@@ -149,12 +152,28 @@ async def menu_navigation(message: Message):
         user_menu_state[user_id] = "my"
         await message.answer("Твои данные:", keyboard=get_my_menu())
     
-    elif text == "🖼 Фото":
+    elif text == "🖼 Фото (обычная)":
         user_menu_state[user_id] = "waiting_photo"
         await message.answer("Отправь мне фото, и я сделаю из него короткую ссылку!")
     
-    elif text == "🎥 Видео":
+    elif text == "🖼 Фото (Яндекс)":
+        await message.answer(
+            "📤 Загрузи фото на Яндекс.Диск по ссылке:\n"
+            "https://disk.yandex.ru/client/upload\n"
+            "После загрузки отправь мне ссылку — я её сокращу.",
+            keyboard=get_create_links_menu()
+        )
+    
+    elif text == "🎥 Видео (обычная)":
         await message.answer("Отправь мне видео, и я сделаю из него короткую ссылку!")
+    
+    elif text == "🎥 Видео (Яндекс)":
+        await message.answer(
+            "📤 Загрузи видео на Яндекс.Диск по ссылке:\n"
+            "https://disk.yandex.ru/client/upload\n"
+            "После загрузки отправь мне ссылку — я её сокращу.",
+            keyboard=get_create_links_menu()
+        )
     
     elif text == "🌐 Сайт":
         await message.answer("Отправь ссылку на сайт, и я её сокращу!")
