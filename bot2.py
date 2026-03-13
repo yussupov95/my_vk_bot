@@ -182,7 +182,7 @@ async def menu_navigation(message: Message):
         await message.answer("Оставь отзыв здесь: https://vk.com/wall-236560135_7")
     
     elif text == "💬 Наш чат":
-        await message.answer("Присоединяйся к чату: https://vk.me/join/rYfRvnGZxRAFS6AQlpM_isdVTkMGwfGAefo=")
+        await message.answer("Присоединяйся к чату: https://vk.me/join/V0Th6yX2jAgaZX1Kmcum2M9togNPA1NCqU=")
     elif text == "💰 Благотворительность":
         await message.answer(
             f"💰 Номер карты Сбера:\n`2202 2081 4442 2046`\n\n"
@@ -276,47 +276,17 @@ async def check_handler(message: Message):
         keyboard=get_info_menu()
     )
 
-@bot.on.message()
-async def unknown_handler(message: Message):
-    if message.from_id != message.peer_id:
-        return
-    await message.answer(
-        "Выбери раздел в меню:",
-        keyboard=get_main_menu()
-    )
-    
-@bot.on.message(text=["!добавить_донат"])
+# ====== АДМИН-КОМАНДА ======
+@bot.on.message(text=["!топ"])
 async def add_donate(message: Message):
     if message.from_id != ADMIN_ID:
         return
     
     parts = message.text.split()
     if len(parts) != 3:
-        await message.answer("❌ Формат: !добавить_донат [id] [сумма]")
+        await message.answer("❌ Формат: !топ [id] [сумма]")
         return
     
     try:
         user_id = parts[1]
-        amount = int(parts[2])
-    except:
-        await message.answer("❌ Ошибка в формате")
-        return
-    
-    month = datetime.now().strftime("%Y-%m")
-    
-    if user_id not in donations_db:
-        donations_db[user_id] = {"total": 0, "months": {}}
-    
-    if month not in donations_db[user_id]["months"]:
-        donations_db[user_id]["months"][month] = 0
-    
-    donations_db[user_id]["months"][month] += amount
-    donations_db[user_id]["total"] += amount
-    save_donations(donations_db)
-    
-    await message.answer(f"✅ Добавлено {amount}₽ пользователю {user_id}")
-
-
-if __name__ == "__main__":
-    print("✅ Бот запущен и ждёт сообщения...")
-    bot.run_forever()
+        amount = int(parts[2]
