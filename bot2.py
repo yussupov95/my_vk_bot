@@ -122,11 +122,32 @@ async def start_handler(message: Message):
 async def photo_handler(message: Message):
     if message.from_id != message.peer_id:
         return
-    # Если пользователь прислал фото без команды — просим выбрать раздел
-    await message.answer(
-        "📸 Выберите раздел в меню, чтобы создать ссылку.",
-        keyboard=get_main_menu()
-    )
+    
+    user_id = message.from_id
+    # Проверяем, ждёт ли бот фото от этого пользователя
+    if user_menu_state.get(user_id) == "waiting_photo":
+        # Обрабатываем фото
+        for attachment in message.attachments:
+            if attachment.photo:
+                photo = attachment.photo
+                long_url = photo.sizes[-1].url
+                short_url = await shorten_url(long_url)
+                photo_id = f"photo{photo.owner_id}_{photo.id}"
+                add_link(message.from_id, short_url, "фото")
+                await message.answer(
+                    f"✅ Готово!\n\n"
+                    f"📌 Короткая ссылка:\n{short_url}\n\n"
+                    f"📌 Attachment:\n{photo_id}",
+                    keyboard=get_create_links_menu()
+                )
+        # Сбрасываем состояние
+        user_menu_state[user_id] = "create"
+    else:
+        # Если фото прислано без команды
+        await message.answer(
+            "📸 Сначала нажми «Фото» в меню «Создать ссылку».",
+            keyboard=get_main_menu()
+        )
 
 @bot.on.message(attachment="video")
 async def video_handler(message: Message):
@@ -266,6 +287,7 @@ async def unknown_handler(message: Message):
 if __name__ == "__main__":
     print("✅ Бот запущен и ждёт сообщения...")
     bot.run_forever()
+
 
 
 
