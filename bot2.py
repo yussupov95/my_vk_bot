@@ -198,7 +198,7 @@ async def menu_navigation(message: Message):
 
 
     elif text == "💰 Благотворительность":
-    await message.answer(
+        await message.answer(
         f"💰 Номер карты Сбера:\n`2202 2081 4442 2046`\n\n"
         f"После перевода нажми кнопку ниже, чтобы сообщить мне.",
         keyboard=(
@@ -310,5 +310,6 @@ async def unknown_handler(message: Message):
 if __name__ == "__main__":
     print("✅ Бот запущен и ждёт сообщения...")
     bot.run_forever()
+
 
 
