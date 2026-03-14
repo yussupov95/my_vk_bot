@@ -292,7 +292,7 @@ async def photo_handler(message: Message):
         return
     
     user_id = message.from_id
-    state = user_menu_state.get(user_id)
+    print(f"Состояние пользователя {user_id}: {state}")
     
     if state == "waiting_photo":
         for attachment in message.attachments:
