@@ -62,7 +62,8 @@ async def shorten_url(long_url) -> str:
                     return await resp.text()
                 else:
                     return long_url
-    except:
+    except Exception as e:
+        print(f"Ошибка сокращения: {e}")
         return str(long_url)
 
 async def enhance_image(image_bytes: bytes) -> bytes:
