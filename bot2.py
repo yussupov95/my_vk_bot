@@ -257,17 +257,25 @@ async def video_handler(message: Message):
     video = message.attachments[0].video
     long_url = None
     
+    # Пробуем получить прямую ссылку на видео
     if hasattr(video, 'files') and video.files:
-        if len(video.files) > 0 and video.files[0].url:
+        if len(video.files) > 0 and hasattr(video.files[0], 'url'):
             long_url = video.files[0].url
-    else:
+    
+    # Если не получили прямую ссылку, делаем ссылку на страницу видео
+    if not long_url:
         long_url = f"https://vk.com/video{video.owner_id}_{video.id}"
     
-    # Защита от None и 0
-    if long_url is None:
-        long_url = ""
-    
-    short_url = await shorten_url(str(long_url))
+    # ФИНАЛЬНАЯ ЗАЩИТА: если всё равно None или пусто
+    if not long_url:
+        short_url = "Не удалось получить ссылку"
+    else:
+        # Преобразуем в строку и проверяем
+        url_str = str(long_url).strip()
+        if url_str and url_str != "None" and url_str != "0":
+            short_url = await shorten_url(url_str)
+        else:
+            short_url = "Не удалось получить ссылку"
     
     video_id = f"video{video.owner_id}_{video.id}"
     add_link(message.from_id, short_url, "видео")
