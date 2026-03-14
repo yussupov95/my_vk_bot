@@ -1,3 +1,2 @@
 vkbottle
 aiohttp
-Pillow
