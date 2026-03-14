@@ -273,7 +273,7 @@ async def video_handler(message: Message):
         # Преобразуем в строку и проверяем
         url_str = str(long_url).strip()
         if url_str and url_str != "None" and url_str != "0":
-            short_url = await shorten_url(url_str)
+            short_url = "https://clck.ru/test"  # временно
         else:
             short_url = "Не удалось получить ссылку"
     
@@ -304,7 +304,7 @@ async def photo_handler(message: Message):
                 if long_url is None:
                     long_url = ""
                 
-                short_url = await shorten_url(str(long_url))
+                short_url = "https://clck.ru/test"  # временно
                 photo_id = f"photo{photo.owner_id}_{photo.id}"
                 add_link(message.from_id, short_url, "фото")
                 await message.answer(
