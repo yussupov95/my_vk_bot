@@ -326,6 +326,11 @@ async def photo_handler(message: Message):
                     async with session.get(photo_url) as resp:
                         image_bytes = await resp.read()
                 enhanced_bytes = await enhance_image(image_bytes)
+                
+                # 👇 ЗАЩИТА ОТ ЧИСЛА 0
+                if not isinstance(enhanced_bytes, bytes):
+                    enhanced_bytes = b""
+                
                 await message.answer(
                     "✨ Качество улучшено!",
                     attachment=enhanced_bytes,
