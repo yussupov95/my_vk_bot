@@ -328,12 +328,23 @@ async def photo_handler(message: Message):
                 if photo_url is None:
                     photo_url = ""
                 
+                # Проверяем, что ссылка корректная
+                if not isinstance(photo_url, str) or not photo_url.startswith("http"):
+                    await message.answer("❌ Некорректная ссылка на фото.")
+                    return
+                
                 async with aiohttp.ClientSession() as session:
                     async with session.get(photo_url) as resp:
                         image_bytes = await resp.read()
+                
+                # Проверяем, что байты получены
+                if not isinstance(image_bytes, bytes) or len(image_bytes) == 0:
+                    await message.answer("❌ Не удалось загрузить фото.")
+                    return
+                
                 enhanced_bytes = await enhance_image(image_bytes)
                 
-                # 👇 ЗАЩИТА ОТ ЧИСЛА 0
+                # Проверяем результат улучшения
                 if not isinstance(enhanced_bytes, bytes):
                     enhanced_bytes = b""
                 
