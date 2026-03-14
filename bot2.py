@@ -67,22 +67,6 @@ async def shorten_url(long_url) -> str:
         print(f"Ошибка сокращения: {e}")
         return str(long_url)
 
-async def enhance_image(image_bytes: bytes) -> bytes:
-    try:
-        img = Image.open(io.BytesIO(image_bytes))
-        enhancer = ImageEnhance.Contrast(img)
-        img = enhancer.enhance(1.3)
-        enhancer = ImageEnhance.Color(img)
-        img = enhancer.enhance(1.2)
-        enhancer = ImageEnhance.Sharpness(img)
-        img = enhancer.enhance(1.5)
-        output = io.BytesIO()
-        img.save(output, format='JPEG', quality=95)
-        return output.getvalue()
-    except Exception as e:
-        print(f"Ошибка улучшения: {e}")
-        return image_bytes
-
 def get_main_menu():
     keyboard = Keyboard(one_time=False, inline=False)
     keyboard.add(Text("📸 Создать ссылку"), color=KeyboardButtonColor.PRIMARY)
@@ -190,7 +174,7 @@ async def menu_navigation(message: Message):
         await message.answer("Оставь отзыв здесь: https://vk.com/wall-236560135_7")
     
     elif text == "💬 Наш чат":
-        await message.answer("Присоединяйся к чату: https://vk.me/join/V0Th6yX2jAgaZX1Kmcum2M9togNPA1NCqU=")
+        await message.answer("Присоединяйся к чату: https://vk.me/join/rYfRvnGZxRAFS6AQlpM_isdVTkMGwfGAefo=")
 
     elif text == "💰 Благотворительность":
         await message.answer(
@@ -250,7 +234,6 @@ async def menu_navigation(message: Message):
         await message.answer("Главное меню:", keyboard=get_main_menu())
 
 @bot.on.message(attachment="video")
-@bot.on.message(attachment="video")
 async def video_handler(message: Message):
     if message.from_id != message.peer_id:
         return
@@ -267,19 +250,11 @@ async def video_handler(message: Message):
     if not long_url:
         long_url = f"https://vk.com/video{video.owner_id}_{video.id}"
     
-    # Преобразуем в строку и проверяем
+    # Преобразуем в строку
     url_str = str(long_url).strip() if long_url else ""
-    if url_str and url_str != "None" and url_str != "0":
-        short_url = "https://clck.ru/test"  # временно
-    else:
-        short_url = "Не удалось получить ссылку"
+    short_url = await shorten_url(url_str) if url_str else "Не удалось получить ссылку"
     
     video_id = f"video{video.owner_id}_{video.id}"
-    
-    # 👇 ЗАЩИТА ОТ ЧИСЕЛ
-    short_url = str(short_url)
-    video_id = str(video_id)
-    
     add_link(message.from_id, short_url, "видео")
     await message.answer(
         f"✅ Готово!\n\n"
@@ -287,7 +262,7 @@ async def video_handler(message: Message):
         f"📌 Attachment:\n{video_id}",
         keyboard=get_create_links_menu()
     )
-    
+
 @bot.on.message(attachment="photo")
 async def photo_handler(message: Message):
     if message.from_id != message.peer_id:
@@ -295,7 +270,6 @@ async def photo_handler(message: Message):
     
     user_id = message.from_id
     state = user_menu_state.get(user_id)
-    print(f"Состояние пользователя {user_id}: {state}")
     
     if state == "waiting_photo":
         for attachment in message.attachments:
@@ -303,11 +277,7 @@ async def photo_handler(message: Message):
                 photo = attachment.photo
                 long_url = photo.sizes[-1].url
                 
-                # Защита от None и пустых значений
-                if long_url is None:
-                    long_url = ""
-                
-                short_url = "https://clck.ru/test"  # временно
+                short_url = await shorten_url(str(long_url))
                 photo_id = f"photo{photo.owner_id}_{photo.id}"
                 add_link(message.from_id, short_url, "фото")
                 await message.answer(
@@ -322,14 +292,12 @@ async def photo_handler(message: Message):
         for attachment in message.attachments:
             if attachment.photo:
                 photo = attachment.photo
-                photo_url = str(photo.sizes[-1].url)  # 👈 преобразуем в строку
+                photo_url = str(photo.sizes[-1].url)
                 
-                # Скачиваем фото
                 async with aiohttp.ClientSession() as session:
                     async with session.get(photo_url) as resp:
                         image_bytes = await resp.read()
                 
-                # Улучшаем качество
                 try:
                     img = Image.open(io.BytesIO(image_bytes))
                     enhancer = ImageEnhance.Contrast(img)
@@ -345,7 +313,6 @@ async def photo_handler(message: Message):
                     await message.answer(f"❌ Ошибка улучшения: {e}")
                     return
                 
-                # Отправляем улучшенное фото
                 await message.answer(
                     "✨ Качество улучшено!",
                     attachment=enhanced_bytes,
