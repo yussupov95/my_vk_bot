@@ -250,6 +250,7 @@ async def menu_navigation(message: Message):
         await message.answer("Главное меню:", keyboard=get_main_menu())
 
 @bot.on.message(attachment="video")
+@bot.on.message(attachment="video")
 async def video_handler(message: Message):
     if message.from_id != message.peer_id:
         return
@@ -274,6 +275,11 @@ async def video_handler(message: Message):
         short_url = "Не удалось получить ссылку"
     
     video_id = f"video{video.owner_id}_{video.id}"
+    
+    # 👇 ЗАЩИТА ОТ ЧИСЕЛ
+    short_url = str(short_url)
+    video_id = str(video_id)
+    
     add_link(message.from_id, short_url, "видео")
     await message.answer(
         f"✅ Готово!\n\n"
