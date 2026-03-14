@@ -292,12 +292,13 @@ async def photo_handler(message: Message):
         for attachment in message.attachments:
             if attachment.photo:
                 photo = attachment.photo
+                # ⚠️ Самое важное: преобразуем в строку сразу
                 photo_url = str(photo.sizes[-1].url)
-                
+
                 async with aiohttp.ClientSession() as session:
                     async with session.get(photo_url) as resp:
                         image_bytes = await resp.read()
-                
+
                 try:
                     img = Image.open(io.BytesIO(image_bytes))
                     enhancer = ImageEnhance.Contrast(img)
@@ -312,7 +313,7 @@ async def photo_handler(message: Message):
                 except Exception as e:
                     await message.answer(f"❌ Ошибка улучшения: {e}")
                     return
-                
+
                 await message.answer(
                     "✨ Качество улучшено!",
                     attachment=enhanced_bytes,
