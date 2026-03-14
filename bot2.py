@@ -4,8 +4,6 @@ import aiohttp
 import json
 import os
 from datetime import datetime
-from PIL import Image, ImageEnhance
-import io
 
 TOKEN = "vk1.a.IShdbvc7y-WNl-laMuw1g-vYEwLHjNk-nPqHZSsPbjC0Ul-dYBVjPyeur0z1i4L5r-XARvPy3p38cedqN38bFvUKqM-uRf8F8AOlJcsqe5r30NWWxep87JyZOw8xwLXXjtr5VDkrm34oo8Doznrqh3K-CdPhUd4ymOI-sjYh47PC4gisZckSK8SOFG-7nzxyBofyRfk9PUm5yaFsWVRFsQ"
 
@@ -193,7 +191,7 @@ async def menu_navigation(message: Message):
         await message.answer("Оставь отзыв здесь: https://vk.com/wall-236560135_7")
     
     elif text == "💬 Наш чат":
-        await message.answer("Присоединяйся к чату: https://vk.me/join/V0Th6yX2jAgaZX1Kmcum2M9togNPA1NCqU=")
+        await message.answer("Присоединяйся к чату: https://vk.me/join/rYfRvnGZxRAFS6AQlpM_isdVTkMGwfGAefo=")
 
     elif text == "💰 Благотворительность":
         await message.answer(
