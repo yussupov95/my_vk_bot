@@ -324,39 +324,9 @@ async def photo_handler(message: Message):
                 photo = attachment.photo
                 photo_url = photo.sizes[-1].url
                 
-                # Защита от None
-                if photo_url is None:
-                    photo_url = ""
-                
-                # Проверяем, что ссылка корректная
-                if not isinstance(photo_url, str) or not photo_url.startswith("http"):
-                    await message.answer("❌ Некорректная ссылка на фото.")
-                    return
-                
-                async with aiohttp.ClientSession() as session:
-                    async with session.get(photo_url) as resp:
-                        image_bytes = await resp.read()
-                
-                # 👇 ВОТ ЗДЕСЬ ДОБАВЛЕНЫ PRINT
-                print(f"Тип image_bytes: {type(image_bytes)}")
-                print(f"Размер image_bytes: {len(image_bytes) if image_bytes else 0}")
-                
-                # Проверяем, что байты получены
-                if not isinstance(image_bytes, bytes) or len(image_bytes) == 0:
-                    await message.answer("❌ Не удалось загрузить фото.")
-                    return
-                
-                enhanced_bytes = await enhance_image(image_bytes)
-                
-                # Проверяем результат улучшения
-                if not isinstance(enhanced_bytes, bytes):
-                    enhanced_bytes = b""
-                
-                await message.answer(
-                    "✨ Качество улучшено!",
-                    attachment=enhanced_bytes,
-                    keyboard=get_create_links_menu()
-                )
+                # ПРОСТО ОТПРАВЛЯЕМ ТО, ЧТО ПРИШЛО
+                await message.answer(f"photo_url = {photo_url}, тип = {type(photo_url)}")
+                return
         user_menu_state[user_id] = "create"
     
     else:
