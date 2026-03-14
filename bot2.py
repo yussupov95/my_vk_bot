@@ -4,6 +4,8 @@ import aiohttp
 import json
 import os
 from datetime import datetime
+from PIL import Image, ImageEnhance
+import io
 
 TOKEN = "vk1.a.IShdbvc7y-WNl-laMuw1g-vYEwLHjNk-nPqHZSsPbjC0Ul-dYBVjPyeur0z1i4L5r-XARvPy3p38cedqN38bFvUKqM-uRf8F8AOlJcsqe5r30NWWxep87JyZOw8xwLXXjtr5VDkrm34oo8Doznrqh3K-CdPhUd4ymOI-sjYh47PC4gisZckSK8SOFG-7nzxyBofyRfk9PUm5yaFsWVRFsQ"
 
@@ -61,6 +63,23 @@ async def shorten_url(long_url: str) -> str:
     except:
         return long_url
 
+async def enhance_image(image_bytes: bytes) -> bytes:
+    """Улучшает качество изображения"""
+    try:
+        img = Image.open(io.BytesIO(image_bytes))
+        enhancer = ImageEnhance.Contrast(img)
+        img = enhancer.enhance(1.3)
+        enhancer = ImageEnhance.Color(img)
+        img = enhancer.enhance(1.2)
+        enhancer = ImageEnhance.Sharpness(img)
+        img = enhancer.enhance(1.5)
+        output = io.BytesIO()
+        img.save(output, format='JPEG', quality=95)
+        return output.getvalue()
+    except Exception as e:
+        print(f"Ошибка улучшения: {e}")
+        return image_bytes
+
 def get_main_menu():
     keyboard = Keyboard(one_time=False, inline=False)
     keyboard.add(Text("📸 Создать ссылку"), color=KeyboardButtonColor.PRIMARY)
@@ -73,6 +92,8 @@ def get_create_links_menu():
     keyboard = Keyboard(one_time=False, inline=False)
     keyboard.add(Text("🖼 Фото (обычная)"), color=KeyboardButtonColor.PRIMARY)
     keyboard.add(Text("🖼 Фото (Яндекс)"), color=KeyboardButtonColor.SECONDARY)
+    keyboard.row()
+    keyboard.add(Text("✨ Улучшить качество"), color=KeyboardButtonColor.PRIMARY)
     keyboard.row()
     keyboard.add(Text("🎥 Видео (обычная)"), color=KeyboardButtonColor.PRIMARY)
     keyboard.add(Text("🎥 Видео (Яндекс)"), color=KeyboardButtonColor.SECONDARY)
@@ -134,7 +155,7 @@ async def video_handler(message: Message):
         keyboard=get_create_links_menu()
     )
 
-@bot.on.message(text=["📸 Создать ссылку", "🎥 Видео", "🖼 Фото (обычная)", "🖼 Фото (Яндекс)", "🎥 Видео (обычная)", "🎥 Видео (Яндекс)", "🌐 Сайт", "ℹ️ Инфо", "👤 Моё", "📝 Отзывы", "💬 Наш чат", "💰 Благотворительность", "🏆 Топ донатеров", "📜 Мои ссылки", "📊 История", "← Назад"])
+@bot.on.message(text=["📸 Создать ссылку", "🎥 Видео", "🖼 Фото (обычная)", "🖼 Фото (Яндекс)", "✨ Улучшить качество", "🎥 Видео (обычная)", "🎥 Видео (Яндекс)", "🌐 Сайт", "ℹ️ Инфо", "👤 Моё", "📝 Отзывы", "💬 Наш чат", "💰 Благотворительность", "🏆 Топ донатеров", "📜 Мои ссылки", "📊 История", "← Назад"])
 async def menu_navigation(message: Message):
     if message.from_id != message.peer_id:
         return
@@ -165,6 +186,10 @@ async def menu_navigation(message: Message):
             "После загрузки отправь мне ссылку — я её сокращу.",
             keyboard=get_create_links_menu()
         )
+    
+    elif text == "✨ Улучшить качество":
+        user_menu_state[user_id] = "waiting_enhance"
+        await message.answer("Отправь мне фото, и я улучшу его качество!")
     
     elif text == "🎥 Видео (обычная)":
         await message.answer("Отправь мне видео, и я сделаю из него короткую ссылку!")
@@ -240,8 +265,8 @@ async def menu_navigation(message: Message):
         await message.answer("📊 История (в разработке)", keyboard=get_my_menu())
     
     elif text == "← Назад":
-            user_menu_state[user_id] = "main"
-            await message.answer("Главное меню:", keyboard=get_main_menu())
+        user_menu_state[user_id] = "main"
+        await message.answer("Главное меню:", keyboard=get_main_menu())
 
 @bot.on.message(attachment="photo")
 async def photo_handler(message: Message):
@@ -249,7 +274,9 @@ async def photo_handler(message: Message):
         return
     
     user_id = message.from_id
-    if user_menu_state.get(user_id) == "waiting_photo":
+    state = user_menu_state.get(user_id)
+    
+    if state == "waiting_photo":
         for attachment in message.attachments:
             if attachment.photo:
                 photo = attachment.photo
@@ -264,9 +291,26 @@ async def photo_handler(message: Message):
                     keyboard=get_create_links_menu()
                 )
         user_menu_state[user_id] = "create"
+    
+    elif state == "waiting_enhance":
+        for attachment in message.attachments:
+            if attachment.photo:
+                photo = attachment.photo
+                photo_url = photo.sizes[-1].url
+                async with aiohttp.ClientSession() as session:
+                    async with session.get(photo_url) as resp:
+                        image_bytes = await resp.read()
+                enhanced_bytes = await enhance_image(image_bytes)
+                await message.answer(
+                    "✨ Качество улучшено!",
+                    attachment=enhanced_bytes,
+                    keyboard=get_create_links_menu()
+                )
+        user_menu_state[user_id] = "create"
+    
     else:
         await message.answer(
-            "📸 Сначала нажми «Фото» в меню «Создать ссылку».",
+            "📸 Сначала выбери действие в меню «Создать ссылку».",
             keyboard=get_main_menu()
         )
 
@@ -278,6 +322,30 @@ async def check_handler(message: Message):
         "⏳ Ожидайте... Админ проверит и добавит вас в список донатеров.",
         keyboard=get_info_menu()
     )
+
+@bot.on.message(text=["!подтвердить", "!Подтвердить", "!ПОДТВЕРДИТЬ"])
+async def confirm_donate(message: Message):
+    if message.from_id != ADMIN_ID:
+        return
+    parts = message.text.split()
+    if len(parts) != 3:
+        await message.answer("❌ Формат: !подтвердить [id] [сумма]")
+        return
+    try:
+        user_id = parts[1]
+        amount = int(parts[2])
+    except:
+        await message.answer("❌ Ошибка в формате")
+        return
+    month = datetime.now().strftime("%Y-%m")
+    if user_id not in donations_db:
+        donations_db[user_id] = {"total": 0, "months": {}}
+    if month not in donations_db[user_id]["months"]:
+        donations_db[user_id]["months"][month] = 0
+    donations_db[user_id]["months"][month] += amount
+    donations_db[user_id]["total"] += amount
+    save_donations(donations_db)
+    await message.answer(f"✅ Добавлено {amount}₽ пользователю {user_id}")
 
 @bot.on.message()
 async def unknown_handler(message: Message):
