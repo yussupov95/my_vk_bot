@@ -51,8 +51,10 @@ def save_donations(donations):
 
 donations_db = load_donations()
 
-async def shorten_url(long_url: str) -> str:
+async def shorten_url(long_url) -> str:
     try:
+        # Принудительно преобразуем в строку
+        long_url = str(long_url)
         async with aiohttp.ClientSession() as session:
             params = {'url': long_url}
             async with session.get('https://clck.ru/--', params=params) as resp:
@@ -61,7 +63,7 @@ async def shorten_url(long_url: str) -> str:
                 else:
                     return long_url
     except:
-        return long_url
+        return str(long_url)
 
 async def enhance_image(image_bytes: bytes) -> bytes:
     """Улучшает качество изображения"""
