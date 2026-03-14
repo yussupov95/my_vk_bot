@@ -53,7 +53,6 @@ donations_db = load_donations()
 
 async def shorten_url(long_url) -> str:
     try:
-        # Принудительно преобразуем в строку
         long_url = str(long_url)
         async with aiohttp.ClientSession() as session:
             params = {'url': long_url}
@@ -67,7 +66,6 @@ async def shorten_url(long_url) -> str:
         return str(long_url)
 
 async def enhance_image(image_bytes: bytes) -> bytes:
-    """Улучшает качество изображения"""
     try:
         img = Image.open(io.BytesIO(image_bytes))
         enhancer = ImageEnhance.Contrast(img)
@@ -136,34 +134,6 @@ async def start_handler(message: Message):
         keyboard=get_main_menu()
     )
 
-@bot.on.message(attachment="video")
-async def video_handler(message: Message):
-    if message.from_id != message.peer_id:
-        return
-    
-    video = message.attachments[0].video
-    long_url = None
-    
-    if hasattr(video, 'files') and video.files:
-        if len(video.files) > 0 and video.files[0].url:
-            long_url = video.files[0].url
-    else:
-        long_url = f"https://vk.com/video{video.owner_id}_{video.id}"
-    
-    if long_url:
-        short_url = await shorten_url(long_url)
-    else:
-        short_url = "Не удалось получить ссылку"
-    
-    video_id = f"video{video.owner_id}_{video.id}"
-    add_link(message.from_id, short_url, "видео")
-    await message.answer(
-        f"✅ Готово!\n\n"
-        f"📌 Короткая ссылка:\n{short_url}\n\n"
-        f"📌 Attachment:\n{video_id}",
-        keyboard=get_create_links_menu()
-    )
-
 @bot.on.message(text=["📸 Создать ссылку", "🎥 Видео", "🖼 Фото (обычная)", "🖼 Фото (Яндекс)", "✨ Улучшить качество", "🎥 Видео (обычная)", "🎥 Видео (Яндекс)", "🌐 Сайт", "ℹ️ Инфо", "👤 Моё", "📝 Отзывы", "💬 Наш чат", "💰 Благотворительность", "🏆 Топ донатеров", "📜 Мои ссылки", "📊 История", "← Назад"])
 async def menu_navigation(message: Message):
     if message.from_id != message.peer_id:
@@ -218,7 +188,7 @@ async def menu_navigation(message: Message):
         await message.answer("Оставь отзыв здесь: https://vk.com/wall-236560135_7")
     
     elif text == "💬 Наш чат":
-        await message.answer("Присоединяйся к чату: https://vk.me/join/rYfRvnGZxRAFS6AQlpM_isdVTkMGwfGAefo=")
+        await message.answer("Присоединяйся к чату: https://vk.me/join/V0Th6yX2jAgaZX1Kmcum2M9togNPA1NCqU=")
 
     elif text == "💰 Благотворительность":
         await message.answer(
@@ -277,6 +247,34 @@ async def menu_navigation(message: Message):
         user_menu_state[user_id] = "main"
         await message.answer("Главное меню:", keyboard=get_main_menu())
 
+@bot.on.message(attachment="video")
+async def video_handler(message: Message):
+    if message.from_id != message.peer_id:
+        return
+    
+    video = message.attachments[0].video
+    long_url = None
+    
+    if hasattr(video, 'files') and video.files:
+        if len(video.files) > 0 and video.files[0].url:
+            long_url = video.files[0].url
+    else:
+        long_url = f"https://vk.com/video{video.owner_id}_{video.id}"
+    
+    if long_url:
+        short_url = await shorten_url(str(long_url))
+    else:
+        short_url = "Не удалось получить ссылку"
+    
+    video_id = f"video{video.owner_id}_{video.id}"
+    add_link(message.from_id, short_url, "видео")
+    await message.answer(
+        f"✅ Готово!\n\n"
+        f"📌 Короткая ссылка:\n{short_url}\n\n"
+        f"📌 Attachment:\n{video_id}",
+        keyboard=get_create_links_menu()
+    )
+
 @bot.on.message(attachment="photo")
 async def photo_handler(message: Message):
     if message.from_id != message.peer_id:
@@ -290,7 +288,7 @@ async def photo_handler(message: Message):
             if attachment.photo:
                 photo = attachment.photo
                 long_url = photo.sizes[-1].url
-                short_url = await shorten_url(long_url)
+                short_url = await shorten_url(str(long_url))
                 photo_id = f"photo{photo.owner_id}_{photo.id}"
                 add_link(message.from_id, short_url, "фото")
                 await message.answer(
