@@ -337,6 +337,10 @@ async def photo_handler(message: Message):
                     async with session.get(photo_url) as resp:
                         image_bytes = await resp.read()
                 
+                # 👇 ВОТ ЗДЕСЬ ДОБАВЛЕНЫ PRINT
+                print(f"Тип image_bytes: {type(image_bytes)}")
+                print(f"Размер image_bytes: {len(image_bytes) if image_bytes else 0}")
+                
                 # Проверяем, что байты получены
                 if not isinstance(image_bytes, bytes) or len(image_bytes) == 0:
                     await message.answer("❌ Не удалось загрузить фото.")
