@@ -291,6 +291,7 @@ async def check_handler(message: Message):
 
 @bot.on.message(text=["!подтвердить", "!Подтвердить", "!ПОДТВЕРДИТЬ"])
 async def confirm_donate(message: Message):
+    print(f"Команда получена от {message.from_id}")
     if message.from_id != ADMIN_ID:
         return
     parts = message.text.split()
