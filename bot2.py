@@ -53,14 +53,16 @@ donations_db = load_donations()
 
 async def shorten_url(long_url) -> str:
     try:
-        long_url = str(long_url)
+        url_str = str(long_url).strip()
+        if not url_str or url_str == "None" or url_str == "0":
+            return "Не удалось получить ссылку"
         async with aiohttp.ClientSession() as session:
-            params = {'url': long_url}
+            params = {'url': url_str}
             async with session.get('https://clck.ru/--', params=params) as resp:
                 if resp.status == 200:
                     return await resp.text()
                 else:
-                    return long_url
+                    return url_str
     except Exception as e:
         print(f"Ошибка сокращения: {e}")
         return str(long_url)
@@ -261,10 +263,11 @@ async def video_handler(message: Message):
     else:
         long_url = f"https://vk.com/video{video.owner_id}_{video.id}"
     
-    if long_url:
-        short_url = await shorten_url(str(long_url))
-    else:
-        short_url = "Не удалось получить ссылку"
+    # Защита от None и 0
+    if long_url is None:
+        long_url = ""
+    
+    short_url = await shorten_url(str(long_url))
     
     video_id = f"video{video.owner_id}_{video.id}"
     add_link(message.from_id, short_url, "видео")
@@ -288,6 +291,11 @@ async def photo_handler(message: Message):
             if attachment.photo:
                 photo = attachment.photo
                 long_url = photo.sizes[-1].url
+                
+                # Защита от None и пустых значений
+                if long_url is None:
+                    long_url = ""
+                
                 short_url = await shorten_url(str(long_url))
                 photo_id = f"photo{photo.owner_id}_{photo.id}"
                 add_link(message.from_id, short_url, "фото")
@@ -304,6 +312,11 @@ async def photo_handler(message: Message):
             if attachment.photo:
                 photo = attachment.photo
                 photo_url = photo.sizes[-1].url
+                
+                # Защита от None
+                if photo_url is None:
+                    photo_url = ""
+                
                 async with aiohttp.ClientSession() as session:
                     async with session.get(photo_url) as resp:
                         image_bytes = await resp.read()
