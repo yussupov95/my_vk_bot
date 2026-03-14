@@ -141,14 +141,19 @@ async def video_handler(message: Message):
     if message.from_id != message.peer_id:
         return
     video = message.attachments[0].video
+    long_url = None
+    
     if hasattr(video, 'files') and video.files:
-        long_url = video.files[0].url if video.files else None
+        if video.files[0].url:
+            long_url = video.files[0].url
     else:
         long_url = f"https://vk.com/video{video.owner_id}_{video.id}"
+    
     if long_url:
         short_url = await shorten_url(long_url)
     else:
         short_url = "Не удалось получить ссылку"
+    
     video_id = f"video{video.owner_id}_{video.id}"
     add_link(message.from_id, short_url, "видео")
     await message.answer(
