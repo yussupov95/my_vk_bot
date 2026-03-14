@@ -291,27 +291,36 @@ async def check_handler(message: Message):
 
 @bot.on.message(text=["!подтвердить", "!Подтвердить", "!ПОДТВЕРДИТЬ"])
 async def confirm_donate(message: Message):
-    print(f"Команда получена от {message.from_id}")
+    print(f"Команда: {message.text}")
+    parts = message.text.split()
+    print(f"Части: {parts}")
+    
     if message.from_id != ADMIN_ID:
         return
-    parts = message.text.split()
+    
     if len(parts) != 3:
         await message.answer("❌ Формат: !подтвердить [id] [сумма]")
         return
+    
     try:
         user_id = parts[1]
         amount = int(parts[2])
     except:
         await message.answer("❌ Ошибка в формате")
         return
+    
     month = datetime.now().strftime("%Y-%m")
+    
     if user_id not in donations_db:
         donations_db[user_id] = {"total": 0, "months": {}}
+    
     if month not in donations_db[user_id]["months"]:
         donations_db[user_id]["months"][month] = 0
+    
     donations_db[user_id]["months"][month] += amount
     donations_db[user_id]["total"] += amount
     save_donations(donations_db)
+    
     await message.answer(f"✅ Добавлено {amount}₽ пользователю {user_id}")
 
 @bot.on.message()
