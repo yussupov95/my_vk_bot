@@ -140,11 +140,12 @@ async def start_handler(message: Message):
 async def video_handler(message: Message):
     if message.from_id != message.peer_id:
         return
+    
     video = message.attachments[0].video
     long_url = None
     
     if hasattr(video, 'files') and video.files:
-        if video.files[0].url:
+        if len(video.files) > 0 and video.files[0].url:
             long_url = video.files[0].url
     else:
         long_url = f"https://vk.com/video{video.owner_id}_{video.id}"
