@@ -4,6 +4,8 @@ import aiohttp
 import json
 import os
 from datetime import datetime
+from PIL import Image, ImageEnhance
+import io
 
 TOKEN = "vk1.a.IShdbvc7y-WNl-laMuw1g-vYEwLHjNk-nPqHZSsPbjC0Ul-dYBVjPyeur0z1i4L5r-XARvPy3p38cedqN38bFvUKqM-uRf8F8AOlJcsqe5r30NWWxep87JyZOw8xwLXXjtr5VDkrm34oo8Doznrqh3K-CdPhUd4ymOI-sjYh47PC4gisZckSK8SOFG-7nzxyBofyRfk9PUm5yaFsWVRFsQ"
 
@@ -78,6 +80,8 @@ def get_create_links_menu():
     keyboard.add(Text("🖼 Фото (обычная)"), color=KeyboardButtonColor.PRIMARY)
     keyboard.add(Text("🖼 Фото (Яндекс)"), color=KeyboardButtonColor.SECONDARY)
     keyboard.row()
+    keyboard.add(Text("✨ Улучшить качество"), color=KeyboardButtonColor.PRIMARY)
+    keyboard.row()
     keyboard.add(Text("🎥 Видео (обычная)"), color=KeyboardButtonColor.PRIMARY)
     keyboard.add(Text("🎥 Видео (Яндекс)"), color=KeyboardButtonColor.SECONDARY)
     keyboard.row()
@@ -116,32 +120,7 @@ async def start_handler(message: Message):
         keyboard=get_main_menu()
     )
 
-@bot.on.message(attachment="video")
-async def video_handler(message: Message):
-    if message.from_id != message.peer_id:
-        return
-    
-    video = message.attachments[0].video
-    long_url = None
-    
-    if hasattr(video, 'files') and video.files:
-        if len(video.files) > 0:
-            long_url = str(video.files[0].url)
-    
-    if not long_url:
-        long_url = f"https://vk.com/video{video.owner_id}_{video.id}"
-    
-    short_url = await shorten_url(long_url)
-    video_id = f"video{video.owner_id}_{video.id}"
-    add_link(message.from_id, short_url, "видео")
-    await message.answer(
-        f"✅ Готово!\n\n"
-        f"📌 Короткая ссылка:\n{short_url}\n\n"
-        f"📌 Attachment:\n{video_id}",
-        keyboard=get_create_links_menu()
-    )
-
-@bot.on.message(text=["📸 Создать ссылку", "🎥 Видео", "🖼 Фото (обычная)", "🖼 Фото (Яндекс)", "🎥 Видео (обычная)", "🎥 Видео (Яндекс)", "🌐 Сайт", "ℹ️ Инфо", "👤 Моё", "📝 Отзывы", "💬 Наш чат", "💰 Благотворительность", "🏆 Топ донатеров", "📜 Мои ссылки", "📊 История", "← Назад"])
+@bot.on.message(text=["📸 Создать ссылку", "🎥 Видео", "🖼 Фото (обычная)", "🖼 Фото (Яндекс)", "✨ Улучшить качество", "🎥 Видео (обычная)", "🎥 Видео (Яндекс)", "🌐 Сайт", "ℹ️ Инфо", "👤 Моё", "📝 Отзывы", "💬 Наш чат", "💰 Благотворительность", "🏆 Топ донатеров", "📜 Мои ссылки", "📊 История", "← Назад"])
 async def menu_navigation(message: Message):
     if message.from_id != message.peer_id:
         return
@@ -172,6 +151,10 @@ async def menu_navigation(message: Message):
             "После загрузки отправь мне ссылку — я её сокращу.",
             keyboard=get_create_links_menu()
         )
+    
+    elif text == "✨ Улучшить качество":
+        user_menu_state[user_id] = "waiting_enhance"
+        await message.answer("Отправь мне фото, и я улучшу его качество!")
     
     elif text == "🎥 Видео (обычная)":
         await message.answer("Отправь мне видео, и я сделаю из него короткую ссылку!")
@@ -250,6 +233,36 @@ async def menu_navigation(message: Message):
         user_menu_state[user_id] = "main"
         await message.answer("Главное меню:", keyboard=get_main_menu())
 
+@bot.on.message(attachment="video")
+async def video_handler(message: Message):
+    if message.from_id != message.peer_id:
+        return
+    
+    video = message.attachments[0].video
+    long_url = None
+    
+    # Пробуем получить прямую ссылку на видео
+    if hasattr(video, 'files') and video.files:
+        if len(video.files) > 0 and hasattr(video.files[0], 'url'):
+            long_url = video.files[0].url
+    
+    # Если не получили прямую ссылку, делаем ссылку на страницу видео
+    if not long_url:
+        long_url = f"https://vk.com/video{video.owner_id}_{video.id}"
+    
+    # Преобразуем в строку
+    url_str = str(long_url).strip() if long_url else ""
+    short_url = await shorten_url(url_str) if url_str else "Не удалось получить ссылку"
+    
+    video_id = f"video{video.owner_id}_{video.id}"
+    add_link(message.from_id, short_url, "видео")
+    await message.answer(
+        f"✅ Готово!\n\n"
+        f"📌 Короткая ссылка:\n{short_url}\n\n"
+        f"📌 Attachment:\n{video_id}",
+        keyboard=get_create_links_menu()
+    )
+
 @bot.on.message(attachment="photo")
 async def photo_handler(message: Message):
     if message.from_id != message.peer_id:
@@ -262,14 +275,47 @@ async def photo_handler(message: Message):
         for attachment in message.attachments:
             if attachment.photo:
                 photo = attachment.photo
-                long_url = str(photo.sizes[-1].url)
-                short_url = await shorten_url(long_url)
+                long_url = photo.sizes[-1].url
+                
+                short_url = await shorten_url(str(long_url))
                 photo_id = f"photo{photo.owner_id}_{photo.id}"
                 add_link(message.from_id, short_url, "фото")
                 await message.answer(
                     f"✅ Готово!\n\n"
                     f"📌 Короткая ссылка:\n{short_url}\n\n"
                     f"📌 Attachment:\n{photo_id}",
+                    keyboard=get_create_links_menu()
+                )
+        user_menu_state[user_id] = "create"
+    
+    elif state == "waiting_enhance":
+        for attachment in message.attachments:
+            if attachment.photo:
+                photo = attachment.photo
+                photo_url = str(photo.sizes[-1].url)
+                
+                async with aiohttp.ClientSession() as session:
+                    async with session.get(photo_url) as resp:
+                        image_bytes = await resp.read()
+                
+                try:
+                    img = Image.open(io.BytesIO(image_bytes))
+                    enhancer = ImageEnhance.Contrast(img)
+                    img = enhancer.enhance(1.3)
+                    enhancer = ImageEnhance.Color(img)
+                    img = enhancer.enhance(1.2)
+                    enhancer = ImageEnhance.Sharpness(img)
+                    img = enhancer.enhance(1.5)
+                    output = io.BytesIO()
+                    img.save(output, format='JPEG', quality=95)
+                    enhanced_bytes = output.getvalue()
+                except Exception as e:
+                    await message.answer(f"❌ Ошибка улучшения: {e}")
+                    return
+                
+                await message.answer(
+                    "✨ Качество улучшено!",
+                    attachment=enhanced_bytes,
                     keyboard=get_create_links_menu()
                 )
         user_menu_state[user_id] = "create"
@@ -291,36 +337,26 @@ async def check_handler(message: Message):
 
 @bot.on.message(text=["!подтвердить", "!Подтвердить", "!ПОДТВЕРДИТЬ"])
 async def confirm_donate(message: Message):
-    print(f"Команда: {message.text}")
-    parts = message.text.split()
-    print(f"Части: {parts}")
-    
     if message.from_id != ADMIN_ID:
         return
-    
+    parts = message.text.split()
     if len(parts) != 3:
         await message.answer("❌ Формат: !подтвердить [id] [сумма]")
         return
-    
     try:
         user_id = parts[1]
         amount = int(parts[2])
     except:
         await message.answer("❌ Ошибка в формате")
         return
-    
     month = datetime.now().strftime("%Y-%m")
-    
     if user_id not in donations_db:
         donations_db[user_id] = {"total": 0, "months": {}}
-    
     if month not in donations_db[user_id]["months"]:
         donations_db[user_id]["months"][month] = 0
-    
     donations_db[user_id]["months"][month] += amount
     donations_db[user_id]["total"] += amount
     save_donations(donations_db)
-    
     await message.answer(f"✅ Добавлено {amount}₽ пользователю {user_id}")
 
 @bot.on.message()
