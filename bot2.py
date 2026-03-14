@@ -266,16 +266,12 @@ async def video_handler(message: Message):
     if not long_url:
         long_url = f"https://vk.com/video{video.owner_id}_{video.id}"
     
-    # ФИНАЛЬНАЯ ЗАЩИТА: если всё равно None или пусто
-    if not long_url:
-        short_url = "Не удалось получить ссылку"
+    # Преобразуем в строку и проверяем
+    url_str = str(long_url).strip() if long_url else ""
+    if url_str and url_str != "None" and url_str != "0":
+        short_url = "https://clck.ru/test"  # временно
     else:
-        # Преобразуем в строку и проверяем
-        url_str = str(long_url).strip()
-        if url_str and url_str != "None" and url_str != "0":
-            short_url = "https://clck.ru/test"  # временно
-        else:
-            short_url = "Не удалось получить ссылку"
+        short_url = "Не удалось получить ссылку"
     
     video_id = f"video{video.owner_id}_{video.id}"
     add_link(message.from_id, short_url, "видео")
@@ -285,7 +281,7 @@ async def video_handler(message: Message):
         f"📌 Attachment:\n{video_id}",
         keyboard=get_create_links_menu()
     )
-
+    
 @bot.on.message(attachment="photo")
 async def photo_handler(message: Message):
     if message.from_id != message.peer_id:
