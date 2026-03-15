@@ -67,6 +67,22 @@ async def shorten_url(long_url) -> str:
         print(f"Ошибка сокращения: {e}")
         return str(long_url)
 
+async def enhance_image(image_bytes: bytes) -> bytes:
+    try:
+        img = Image.open(io.BytesIO(image_bytes))
+        enhancer = ImageEnhance.Contrast(img)
+        img = enhancer.enhance(1.3)
+        enhancer = ImageEnhance.Color(img)
+        img = enhancer.enhance(1.2)
+        enhancer = ImageEnhance.Sharpness(img)
+        img = enhancer.enhance(1.5)
+        output = io.BytesIO()
+        img.save(output, format='JPEG', quality=95)
+        return output.getvalue()
+    except Exception as e:
+        print(f"Ошибка улучшения: {e}")
+        return image_bytes
+
 def get_main_menu():
     keyboard = Keyboard(one_time=False, inline=False)
     keyboard.add(Text("📸 Создать ссылку"), color=KeyboardButtonColor.PRIMARY)
@@ -118,6 +134,31 @@ async def start_handler(message: Message):
     await message.answer(
         "Добро пожаловать в ХостингБот! Выбери раздел:",
         keyboard=get_main_menu()
+    )
+
+@bot.on.message(attachment="video")
+async def video_handler(message: Message):
+    if message.from_id != message.peer_id:
+        return
+    
+    video = message.attachments[0].video
+    long_url = None
+    
+    if hasattr(video, 'files') and video.files:
+        if len(video.files) > 0:
+            long_url = str(video.files[0].url)
+    
+    if not long_url:
+        long_url = f"https://vk.com/video{video.owner_id}_{video.id}"
+    
+    short_url = await shorten_url(long_url)
+    video_id = f"video{video.owner_id}_{video.id}"
+    add_link(message.from_id, short_url, "видео")
+    await message.answer(
+        f"✅ Готово!\n\n"
+        f"📌 Короткая ссылка:\n{short_url}\n\n"
+        f"📌 Attachment:\n{video_id}",
+        keyboard=get_create_links_menu()
     )
 
 @bot.on.message(text=["📸 Создать ссылку", "🎥 Видео", "🖼 Фото (обычная)", "🖼 Фото (Яндекс)", "✨ Улучшить качество", "🎥 Видео (обычная)", "🎥 Видео (Яндекс)", "🌐 Сайт", "ℹ️ Инфо", "👤 Моё", "📝 Отзывы", "💬 Наш чат", "💰 Благотворительность", "🏆 Топ донатеров", "📜 Мои ссылки", "📊 История", "← Назад"])
@@ -195,11 +236,10 @@ async def menu_navigation(message: Message):
         )
     
     elif text == "🏆 Топ донатеров":
-        # Здесь ты можешь вручную прописать людей
         top_list = [
-            {"id": 109632541, "name": "Hunter Bey", "amount": 22},
-            {"id": 609908758, "name": "Borz Yussupov", "amount": 83},
-            {"id": 737242425, "name": "Phoenix Bey", "amount": 57},
+            {"id": 609908758, "name": "Borz Yussupov", "amount": 73},
+            {"id": 737242425, "name": "Phoenix Bey", "amount": 46},
+            {"id": 1096325641, "name": "Hunter Bey", "amount": 30},
         ]
         
         if not top_list:
@@ -230,36 +270,6 @@ async def menu_navigation(message: Message):
         user_menu_state[user_id] = "main"
         await message.answer("Главное меню:", keyboard=get_main_menu())
 
-@bot.on.message(attachment="video")
-async def video_handler(message: Message):
-    if message.from_id != message.peer_id:
-        return
-    
-    video = message.attachments[0].video
-    long_url = None
-    
-    # Пробуем получить прямую ссылку на видео
-    if hasattr(video, 'files') and video.files:
-        if len(video.files) > 0 and hasattr(video.files[0], 'url'):
-            long_url = video.files[0].url
-    
-    # Если не получили прямую ссылку, делаем ссылку на страницу видео
-    if not long_url:
-        long_url = f"https://vk.com/video{video.owner_id}_{video.id}"
-    
-    # Преобразуем в строку
-    url_str = str(long_url).strip() if long_url else ""
-    short_url = await shorten_url(url_str) if url_str else "Не удалось получить ссылку"
-    
-    video_id = f"video{video.owner_id}_{video.id}"
-    add_link(message.from_id, short_url, "видео")
-    await message.answer(
-        f"✅ Готово!\n\n"
-        f"📌 Короткая ссылка:\n{short_url}\n\n"
-        f"📌 Attachment:\n{video_id}",
-        keyboard=get_create_links_menu()
-    )
-
 @bot.on.message(attachment="photo")
 async def photo_handler(message: Message):
     if message.from_id != message.peer_id:
@@ -272,9 +282,8 @@ async def photo_handler(message: Message):
         for attachment in message.attachments:
             if attachment.photo:
                 photo = attachment.photo
-                long_url = photo.sizes[-1].url
-                
-                short_url = await shorten_url(str(long_url))
+                long_url = str(photo.sizes[-1].url)
+                short_url = await shorten_url(long_url)
                 photo_id = f"photo{photo.owner_id}_{photo.id}"
                 add_link(message.from_id, short_url, "фото")
                 await message.answer(
@@ -331,30 +340,6 @@ async def check_handler(message: Message):
         "⏳ Ожидайте... Админ проверит и добавит вас в список донатеров.",
         keyboard=get_info_menu()
     )
-
-@bot.on.message(text=["!подтвердить", "!Подтвердить", "!ПОДТВЕРДИТЬ"])
-async def confirm_donate(message: Message):
-    if message.from_id != ADMIN_ID:
-        return
-    parts = message.text.split()
-    if len(parts) != 3:
-        await message.answer("❌ Формат: !подтвердить [id] [сумма]")
-        return
-    try:
-        user_id = parts[1]
-        amount = int(parts[2])
-    except:
-        await message.answer("❌ Ошибка в формате")
-        return
-    month = datetime.now().strftime("%Y-%m")
-    if user_id not in donations_db:
-        donations_db[user_id] = {"total": 0, "months": {}}
-    if month not in donations_db[user_id]["months"]:
-        donations_db[user_id]["months"][month] = 0
-    donations_db[user_id]["months"][month] += amount
-    donations_db[user_id]["total"] += amount
-    save_donations(donations_db)
-    await message.answer(f"✅ Добавлено {amount}₽ пользователю {user_id}")
 
 @bot.on.message()
 async def unknown_handler(message: Message):
