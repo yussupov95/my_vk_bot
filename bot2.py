@@ -345,6 +345,7 @@ async def check_handler(message: Message):
 async def unknown_handler(message: Message):
     if message.from_id != message.peer_id:
         return
+    print(f"unknown_handler получил сообщение: {message.text}")
     await message.answer(
         "Выбери раздел в меню:",
         keyboard=get_main_menu()
