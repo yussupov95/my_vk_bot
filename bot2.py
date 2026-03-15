@@ -195,25 +195,22 @@ async def menu_navigation(message: Message):
         )
     
     elif text == "🏆 Топ донатеров":
-        current_month = datetime.now().strftime("%Y-%m")
-        month_data = []
-        for uid, data in donations_db.items():
-            if current_month in data.get("months", {}):
-                month_data.append((uid, data["months"][current_month]))
+        # Здесь ты можешь вручную прописать людей
+        top_list = [
+            {"id": 109632541, "name": "Hunter Bey", "amount": 22},
+            {"id": 609908758, "name": "Borz Yussupov", "amount": 83},
+            {"id": 737242425, "name": "Phoenix Bey", "amount": 57},
+        ]
         
-        if not month_data:
+        if not top_list:
             await message.answer("🏆 Пока нет донатеров в этом месяце.", keyboard=get_info_menu())
             return
         
-        month_data.sort(key=lambda x: x[1], reverse=True)
-        text = "🏆 **Топ донатеров месяца:**\n\n"
-        for i, (uid, amount) in enumerate(month_data[:10], 1):
-            try:
-                user = await bot.api.users.get(int(uid))
-                name = f"{user[0].first_name} {user[0].last_name}"
-            except:
-                name = f"Пользователь {uid}"
-            text += f"{i}. {name} — {amount}₽\n"
+        text = "🏆 **Топ донатеров (за всё время):**\n\n"
+        for i, user in enumerate(top_list, 1):
+            text += f"{i}. {user['name']} — {user['amount']}₽\n"
+            text += f"   👤 vk.com/id{user['id']}\n"
+        
         await message.answer(text, keyboard=get_info_menu())
     
     elif text == "📜 Мои ссылки":
