@@ -241,7 +241,8 @@ async def menu_navigation(message: Message):
             {"id": 737242425, "name": "Phoenix Bey", "amount": 46},
             {"id": 1096325641, "name": "Hunter Bey", "amount": 30},
         ]
-             if not top_list:
+        
+        if not top_list:
             await message.answer("🏆 Пока нет донатеров в этом месяце.", keyboard=get_info_menu())
             return
     
