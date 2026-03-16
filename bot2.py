@@ -274,17 +274,25 @@ async def photo_handler(message: Message):
     state = user_menu_state.get(user_id)
     
     if state == "waiting_photo":
+        links = []
         for attachment in message.attachments:
             if attachment.photo:
                 photo = attachment.photo
                 long_url = str(photo.sizes[-1].url)
                 short_url = await shorten_url(long_url)
-                
-                await message.answer(
-                    f"✅ Готово!\n\n"
-                    f"📌 Короткая ссылка:\n{short_url}",
-                    keyboard=get_create_links_menu()
-                )
+                links.append(f"📌 {short_url}")
+        
+        if links:
+            # Отправляем все ссылки одним сообщением
+            await message.answer(
+                f"✅ Готово! Ссылки на фото:\n\n" + "\n".join(links),
+                keyboard=get_create_links_menu()
+            )
+        else:
+            await message.answer(
+                "❌ Не найдено фото в сообщении.",
+                keyboard=get_create_links_menu()
+            )
         user_menu_state[user_id] = "create"
     
     elif state == "waiting_enhance":
