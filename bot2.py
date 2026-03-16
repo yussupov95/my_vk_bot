@@ -242,10 +242,10 @@ async def menu_navigation(message: Message):
             {"id": 1096325641, "name": "Hunter Bey", "amount": 30},
         ]
         
-        # text = "🏆 **Топ донатеров (за всё время):**\n\n"
-        # for i, user in enumerate(top_list, 1):
-        #     text += f"{i}. {user['name']} — {user['amount']}₽\n"
-        #     text += f"   👤 vk.com/id{user['id']}\n"
+        text = "🏆 **Топ донатеров (за всё время):**\n\n"
+        for i, user in enumerate(top_list, 1):
+            text += f"{i}. {user['name']} — {user['amount']}₽\n"
+            text += f"   👤 vk.com/id{user['id']}\n"
         
         await message.answer(text, keyboard=get_info_menu())
     
