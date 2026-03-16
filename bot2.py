@@ -1,352 +1,352 @@
-# from vkbottle.bot import Bot, Message
-# from vkbottle import Keyboard, KeyboardButtonColor, Text
-# import aiohttp
-# import json
-# import os
-# from datetime import datetime
-# from PIL import Image, ImageEnhance
-# import io
+from vkbottle.bot import Bot, Message
+from vkbottle import Keyboard, KeyboardButtonColor, Text
+import aiohttp
+import json
+import os
+from datetime import datetime
+from PIL import Image, ImageEnhance
+import io
 
-# TOKEN = "vk1.a.IShdbvc7y-WNl-laMuw1g-vYEwLHjNk-nPqHZSsPbjC0Ul-dYBVjPyeur0z1i4L5r-XARvPy3p38cedqN38bFvUKqM-uRf8F8AOlJcsqe5r30NWWxep87JyZOw8xwLXXjtr5VDkrm34oo8Doznrqh3K-CdPhUd4ymOI-sjYh47PC4gisZckSK8SOFG-7nzxyBofyRfk9PUm5yaFsWVRFsQ"
+TOKEN = "vk1.a.OznfrtF8gNhZnBDoAD81xPBpu1Om6qjAaDJQYTV9duP90yNjcI_Zx9T1fmbrLw4Xrd2ZjxwgQqxQahNjDolr0HlT8bVBKzgMx1f-m0G3i7cykXZ4zrxeIrkCQZzhovHqMYKbWENzptFvhEgK0SLES-cfNddtJIbQbazb-NpYBEaIsYRYho-_m7gvkIKyhXD1jaR8vDEKlPOqklOiKc3j9Q"
 
-# bot = Bot(token=TOKEN)
+bot = Bot(token=TOKEN)
 
-# HISTORY_FILE = "history.json"
-# DONATIONS_FILE = "donations.json"
+HISTORY_FILE = "history.json"
+DONATIONS_FILE = "donations.json"
 
-# ADMIN_ID = 609908758
+ADMIN_ID = 609908758
 
-# user_menu_state = {}
+user_menu_state = {}
 
-# def load_history():
-#     if os.path.exists(HISTORY_FILE):
-#         with open(HISTORY_FILE, "r", encoding="utf-8") as f:
-#             return json.load(f)
-#     return {}
+def load_history():
+    if os.path.exists(HISTORY_FILE):
+        with open(HISTORY_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    return {}
 
-# def save_history(history):
-#     with open(HISTORY_FILE, "w", encoding="utf-8") as f:
-#         json.dump(history, f, ensure_ascii=False, indent=2)
+def save_history(history):
+    with open(HISTORY_FILE, "w", encoding="utf-8") as f:
+        json.dump(history, f, ensure_ascii=False, indent=2)
 
-# history_db = load_history()
+history_db = load_history()
 
-# def add_link(user_id, link, link_type):
-#     user_id = str(user_id)
-#     if user_id not in history_db:
-#         history_db[user_id] = []
-#     history_db[user_id].append({"link": link, "type": link_type})
-#     if len(history_db[user_id]) > 5:
-#         history_db[user_id].pop(0)
-#     save_history(history_db)
+def add_link(user_id, link, link_type):
+    user_id = str(user_id)
+    if user_id not in history_db:
+        history_db[user_id] = []
+    history_db[user_id].append({"link": link, "type": link_type})
+    if len(history_db[user_id]) > 5:
+        history_db[user_id].pop(0)
+    save_history(history_db)
 
-# def load_donations():
-#     if os.path.exists(DONATIONS_FILE):
-#         with open(DONATIONS_FILE, "r", encoding="utf-8") as f:
-#             return json.load(f)
-#     return {}
+def load_donations():
+    if os.path.exists(DONATIONS_FILE):
+        with open(DONATIONS_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    return {}
 
-# def save_donations(donations):
-#     with open(DONATIONS_FILE, "w", encoding="utf-8") as f:
-#         json.dump(donations, f, ensure_ascii=False, indent=2)
+def save_donations(donations):
+    with open(DONATIONS_FILE, "w", encoding="utf-8") as f:
+        json.dump(donations, f, ensure_ascii=False, indent=2)
 
-# donations_db = load_donations()
+donations_db = load_donations()
 
-# async def shorten_url(long_url) -> str:
-#     try:
-#         url_str = str(long_url).strip()
-#         if not url_str or url_str == "None" or url_str == "0":
-#             return "Не удалось получить ссылку"
-#         async with aiohttp.ClientSession() as session:
-#             params = {'url': url_str}
-#             async with session.get('https://clck.ru/--', params=params) as resp:
-#                 if resp.status == 200:
-#                     return await resp.text()
-#                 else:
-#                     return url_str
-#     except Exception as e:
-#         print(f"Ошибка сокращения: {e}")
-#         return str(long_url)
+async def shorten_url(long_url) -> str:
+    try:
+        url_str = str(long_url).strip()
+        if not url_str or url_str == "None" or url_str == "0":
+            return "Не удалось получить ссылку"
+        async with aiohttp.ClientSession() as session:
+            params = {'url': url_str}
+            async with session.get('https://clck.ru/--', params=params) as resp:
+                if resp.status == 200:
+                    return await resp.text()
+                else:
+                    return url_str
+    except Exception as e:
+        print(f"Ошибка сокращения: {e}")
+        return str(long_url)
 
-# async def enhance_image(image_bytes: bytes) -> bytes:
-#     try:
-#         img = Image.open(io.BytesIO(image_bytes))
-#         enhancer = ImageEnhance.Contrast(img)
-#         img = enhancer.enhance(1.3)
-#         enhancer = ImageEnhance.Color(img)
-#         img = enhancer.enhance(1.2)
-#         enhancer = ImageEnhance.Sharpness(img)
-#         img = enhancer.enhance(1.5)
-#         output = io.BytesIO()
-#         img.save(output, format='JPEG', quality=95)
-#         return output.getvalue()
-#     except Exception as e:
-#         print(f"Ошибка улучшения: {e}")
-#         return image_bytes
+async def enhance_image(image_bytes: bytes) -> bytes:
+    try:
+        img = Image.open(io.BytesIO(image_bytes))
+        enhancer = ImageEnhance.Contrast(img)
+        img = enhancer.enhance(1.3)
+        enhancer = ImageEnhance.Color(img)
+        img = enhancer.enhance(1.2)
+        enhancer = ImageEnhance.Sharpness(img)
+        img = enhancer.enhance(1.5)
+        output = io.BytesIO()
+        img.save(output, format='JPEG', quality=95)
+        return output.getvalue()
+    except Exception as e:
+        print(f"Ошибка улучшения: {e}")
+        return image_bytes
 
-# def get_main_menu():
-#     keyboard = Keyboard(one_time=False, inline=False)
-#     keyboard.add(Text("📸 Создать ссылку"), color=KeyboardButtonColor.PRIMARY)
-#     keyboard.add(Text("ℹ️ Инфо"), color=KeyboardButtonColor.SECONDARY)
-#     keyboard.row()
-#     keyboard.add(Text("👤 Моё"), color=KeyboardButtonColor.SECONDARY)
-#     return keyboard
+def get_main_menu():
+    keyboard = Keyboard(one_time=False, inline=False)
+    keyboard.add(Text("📸 Создать ссылку"), color=KeyboardButtonColor.PRIMARY)
+    keyboard.add(Text("ℹ️ Инфо"), color=KeyboardButtonColor.SECONDARY)
+    keyboard.row()
+    keyboard.add(Text("👤 Моё"), color=KeyboardButtonColor.SECONDARY)
+    return keyboard
 
-# def get_create_links_menu():
-#     keyboard = Keyboard(one_time=False, inline=False)
-#     keyboard.add(Text("🖼 Фото (обычная)"), color=KeyboardButtonColor.PRIMARY)
-#     keyboard.add(Text("🖼 Фото (Яндекс)"), color=KeyboardButtonColor.SECONDARY)
-#     keyboard.row()
-#     keyboard.add(Text("✨ Улучшить качество"), color=KeyboardButtonColor.PRIMARY)
-#     keyboard.row()
-#     keyboard.add(Text("🎥 Видео (обычная)"), color=KeyboardButtonColor.PRIMARY)
-#     keyboard.add(Text("🎥 Видео (Яндекс)"), color=KeyboardButtonColor.SECONDARY)
-#     keyboard.row()
-#     keyboard.add(Text("🌐 Сайт"), color=KeyboardButtonColor.PRIMARY)
-#     keyboard.row()
-#     keyboard.add(Text("← Назад"), color=KeyboardButtonColor.SECONDARY)
-#     return keyboard
+def get_create_links_menu():
+    keyboard = Keyboard(one_time=False, inline=False)
+    keyboard.add(Text("🖼 Фото (обычная)"), color=KeyboardButtonColor.PRIMARY)
+    keyboard.add(Text("🖼 Фото (Яндекс)"), color=KeyboardButtonColor.SECONDARY)
+    keyboard.row()
+    keyboard.add(Text("✨ Улучшить качество"), color=KeyboardButtonColor.PRIMARY)
+    keyboard.row()
+    keyboard.add(Text("🎥 Видео (обычная)"), color=KeyboardButtonColor.PRIMARY)
+    keyboard.add(Text("🎥 Видео (Яндекс)"), color=KeyboardButtonColor.SECONDARY)
+    keyboard.row()
+    keyboard.add(Text("🌐 Сайт"), color=KeyboardButtonColor.PRIMARY)
+    keyboard.row()
+    keyboard.add(Text("← Назад"), color=KeyboardButtonColor.SECONDARY)
+    return keyboard
 
-# def get_info_menu():
-#     keyboard = Keyboard(one_time=False, inline=False)
-#     keyboard.add(Text("📝 Отзывы"), color=KeyboardButtonColor.SECONDARY)
-#     keyboard.add(Text("💬 Наш чат"), color=KeyboardButtonColor.SECONDARY)
-#     keyboard.row()
-#     keyboard.add(Text("💰 Благотворительность"), color=KeyboardButtonColor.PRIMARY)
-#     keyboard.row()
-#     keyboard.add(Text("🏆 Топ донатеров"), color=KeyboardButtonColor.SECONDARY)
-#     keyboard.row()
-#     keyboard.add(Text("← Назад"), color=KeyboardButtonColor.SECONDARY)
-#     return keyboard
+def get_info_menu():
+    keyboard = Keyboard(one_time=False, inline=False)
+    keyboard.add(Text("📝 Отзывы"), color=KeyboardButtonColor.SECONDARY)
+    keyboard.add(Text("💬 Наш чат"), color=KeyboardButtonColor.SECONDARY)
+    keyboard.row()
+    keyboard.add(Text("💰 Благотворительность"), color=KeyboardButtonColor.PRIMARY)
+    keyboard.row()
+    keyboard.add(Text("🏆 Топ донатеров"), color=KeyboardButtonColor.SECONDARY)
+    keyboard.row()
+    keyboard.add(Text("← Назад"), color=KeyboardButtonColor.SECONDARY)
+    return keyboard
 
-# def get_my_menu():
-#     keyboard = Keyboard(one_time=False, inline=False)
-#     keyboard.add(Text("📜 Мои ссылки"), color=KeyboardButtonColor.SECONDARY)
-#     keyboard.add(Text("📊 История"), color=KeyboardButtonColor.SECONDARY)
-#     keyboard.row()
-#     keyboard.add(Text("← Назад"), color=KeyboardButtonColor.SECONDARY)
-#     return keyboard
+def get_my_menu():
+    keyboard = Keyboard(one_time=False, inline=False)
+    keyboard.add(Text("📜 Мои ссылки"), color=KeyboardButtonColor.SECONDARY)
+    keyboard.add(Text("📊 История"), color=KeyboardButtonColor.SECONDARY)
+    keyboard.row()
+    keyboard.add(Text("← Назад"), color=KeyboardButtonColor.SECONDARY)
+    return keyboard
 
-# @bot.on.message(text=["Начать", "Start", "начать", "start"])
-# async def start_handler(message: Message):
-#     if message.from_id != message.peer_id:
-#         return
-#     user_menu_state[message.from_id] = "main"
-#     await message.answer(
-#         "Добро пожаловать в ХостингБот! Выбери раздел:",
-#         keyboard=get_main_menu()
-#     )
+@bot.on.message(text=["Начать", "Start", "начать", "start"])
+async def start_handler(message: Message):
+    if message.from_id != message.peer_id:
+        return
+    user_menu_state[message.from_id] = "main"
+    await message.answer(
+        "Добро пожаловать в ХостингБот! Выбери раздел:",
+        keyboard=get_main_menu()
+    )
 
-# @bot.on.message(attachment="video")
-# async def video_handler(message: Message):
-#     if message.from_id != message.peer_id:
-#         return
+@bot.on.message(attachment="video")
+async def video_handler(message: Message):
+    if message.from_id != message.peer_id:
+        return
     
-#     video = message.attachments[0].video
-#     long_url = None
+    video = message.attachments[0].video
+    long_url = None
     
-#     if hasattr(video, 'files') and video.files:
-#         if len(video.files) > 0:
-#             long_url = str(video.files[0].url)
+    if hasattr(video, 'files') and video.files:
+        if len(video.files) > 0:
+            long_url = str(video.files[0].url)
     
-#     if not long_url:
-#         long_url = f"https://vk.com/video{video.owner_id}_{video.id}"
+    if not long_url:
+        long_url = f"https://vk.com/video{video.owner_id}_{video.id}"
     
-#     short_url = await shorten_url(long_url)
-#     video_id = f"video{video.owner_id}_{video.id}"
-#     add_link(message.from_id, short_url, "видео")
-#     await message.answer(
-#         f"✅ Готово!\n\n"
-#         f"📌 Короткая ссылка:\n{short_url}\n\n"
-#         f"📌 Attachment:\n{video_id}",
-#         keyboard=get_create_links_menu()
-#     )
+    short_url = await shorten_url(long_url)
+    video_id = f"video{video.owner_id}_{video.id}"
+    add_link(message.from_id, short_url, "видео")
+    await message.answer(
+        f"✅ Готово!\n\n"
+        f"📌 Короткая ссылка:\n{short_url}\n\n"
+        f"📌 Attachment:\n{video_id}",
+        keyboard=get_create_links_menu()
+    )
 
-# @bot.on.message(text=["📸 Создать ссылку", "🎥 Видео", "🖼 Фото (обычная)", "🖼 Фото (Яндекс)", "✨ Улучшить качество", "🎥 Видео (обычная)", "🎥 Видео (Яндекс)", "🌐 Сайт", "ℹ️ Инфо", "👤 Моё", "📝 Отзывы", "💬 Наш чат", "💰 Благотворительность", "🏆 Топ донатеров", "📜 Мои ссылки", "📊 История", "← Назад"])
-# async def menu_navigation(message: Message):
-#     if message.from_id != message.peer_id:
-#         return
+@bot.on.message(text=["📸 Создать ссылку", "🎥 Видео", "🖼 Фото (обычная)", "🖼 Фото (Яндекс)", "✨ Улучшить качество", "🎥 Видео (обычная)", "🎥 Видео (Яндекс)", "🌐 Сайт", "ℹ️ Инфо", "👤 Моё", "📝 Отзывы", "💬 Наш чат", "💰 Благотворительность", "🏆 Топ донатеров", "📜 Мои ссылки", "📊 История", "← Назад"])
+async def menu_navigation(message: Message):
+    if message.from_id != message.peer_id:
+        return
     
-#     user_id = message.from_id
-#     text = message.text
+    user_id = message.from_id
+    text = message.text
     
-#     if text == "📸 Создать ссылку":
-#         user_menu_state[user_id] = "create"
-#         await message.answer("Выбери тип ссылки:", keyboard=get_create_links_menu())
+    if text == "📸 Создать ссылку":
+        user_menu_state[user_id] = "create"
+        await message.answer("Выбери тип ссылки:", keyboard=get_create_links_menu())
     
-#     elif text == "ℹ️ Инфо":
-#         user_menu_state[user_id] = "info"
-#         await message.answer("Информация:", keyboard=get_info_menu())
+    elif text == "ℹ️ Инфо":
+        user_menu_state[user_id] = "info"
+        await message.answer("Информация:", keyboard=get_info_menu())
     
-#     elif text == "👤 Моё":
-#         user_menu_state[user_id] = "my"
-#         await message.answer("Твои данные:", keyboard=get_my_menu())
+    elif text == "👤 Моё":
+        user_menu_state[user_id] = "my"
+        await message.answer("Твои данные:", keyboard=get_my_menu())
     
-#     elif text == "🖼 Фото (обычная)":
-#         user_menu_state[user_id] = "waiting_photo"
-#         await message.answer("Отправь мне фото, и я сделаю из него короткую ссылку!")
+    elif text == "🖼 Фото (обычная)":
+        user_menu_state[user_id] = "waiting_photo"
+        await message.answer("Отправь мне фото, и я сделаю из него короткую ссылку!")
     
-#     elif text == "🖼 Фото (Яндекс)":
-#         await message.answer(
-#             "📤 Загрузи фото на Яндекс.Диск по ссылке:\n"
-#             "https://disk.yandex.ru/client/upload\n"
-#             "После загрузки отправь мне ссылку — я её сокращу.",
-#             keyboard=get_create_links_menu()
-#         )
+    elif text == "🖼 Фото (Яндекс)":
+        await message.answer(
+            "📤 Загрузи фото на Яндекс.Диск по ссылке:\n"
+            "https://disk.yandex.ru/client/upload\n"
+            "После загрузки отправь мне ссылку — я её сокращу.",
+            keyboard=get_create_links_menu()
+        )
     
-#     elif text == "✨ Улучшить качество":
-#         user_menu_state[user_id] = "waiting_enhance"
-#         await message.answer("Отправь мне фото, и я улучшу его качество!")
+    elif text == "✨ Улучшить качество":
+        user_menu_state[user_id] = "waiting_enhance"
+        await message.answer("Отправь мне фото, и я улучшу его качество!")
     
-#     elif text == "🎥 Видео (обычная)":
-#         await message.answer("Отправь мне видео, и я сделаю из него короткую ссылку!")
+    elif text == "🎥 Видео (обычная)":
+        await message.answer("Отправь мне видео, и я сделаю из него короткую ссылку!")
     
-#     elif text == "🎥 Видео (Яндекс)":
-#         await message.answer(
-#             "📤 Загрузи видео на Яндекс.Диск по ссылке:\n"
-#             "https://disk.yandex.ru/client/upload\n"
-#             "После загрузки отправь мне ссылку — я её сокращу.",
-#             keyboard=get_create_links_menu()
-#         )
+    elif text == "🎥 Видео (Яндекс)":
+        await message.answer(
+            "📤 Загрузи видео на Яндекс.Диск по ссылке:\n"
+            "https://disk.yandex.ru/client/upload\n"
+            "После загрузки отправь мне ссылку — я её сокращу.",
+            keyboard=get_create_links_menu()
+        )
     
-#     elif text == "🌐 Сайт":
-#         await message.answer("Отправь ссылку на сайт, и я её сокращу!")
+    elif text == "🌐 Сайт":
+        await message.answer("Отправь ссылку на сайт, и я её сокращу!")
     
-#     elif text == "📝 Отзывы":
-#         await message.answer("Оставь отзыв здесь: https://vk.com/wall-236560135_7")
+    elif text == "📝 Отзывы":
+        await message.answer("Оставь отзыв здесь: https://vk.com/wall-236560135_7")
     
-#     elif text == "💬 Наш чат":
-#         await message.answer("Присоединяйся к чату: https://vk.me/join/rYfRvnGZxRAFS6AQlpM_isdVTkMGwfGAefo=")
+    elif text == "💬 Наш чат":
+        await message.answer("Присоединяйся к чату: https://vk.me/join/rYfRvnGZxRAFS6AQlpM_isdVTkMGwfGAefo=")
 
-#     elif text == "💰 Благотворительность":
-#         await message.answer(
-#             f"💰 Номер карты Сбера:\n`2202 2081 4442 2046`\n\n"
-#             f"Спасибо! Если хотите попасть в топ донатеров, отправьте чек перевода и мы добавим вас в список.",
-#             keyboard=(
-#                 Keyboard(inline=False)
-#                 .add(Text("✅ Я перевёл"), color=KeyboardButtonColor.POSITIVE)
-#                 .row()
-#                 .add(Text("← Назад"), color=KeyboardButtonColor.SECONDARY)
-#             )
-#         )
+    elif text == "💰 Благотворительность":
+        await message.answer(
+            f"💰 Номер карты Сбера:\n`2202 2081 4442 2046`\n\n"
+            f"Спасибо! Если хотите попасть в топ донатеров, отправьте чек перевода и мы добавим вас в список.",
+            keyboard=(
+                Keyboard(inline=False)
+                .add(Text("✅ Я перевёл"), color=KeyboardButtonColor.POSITIVE)
+                .row()
+                .add(Text("← Назад"), color=KeyboardButtonColor.SECONDARY)
+            )
+        )
     
-#     elif text == "✅ Я перевёл":
-#         await message.answer(
-#             "📸 Скиньте чек (скриншот перевода), чтобы мы убедились в платеже и добавили вас в список донатеров.",
-#             keyboard=get_info_menu()
-#         )
+    elif text == "✅ Я перевёл":
+        await message.answer(
+            "📸 Скиньте чек (скриншот перевода), чтобы мы убедились в платеже и добавили вас в список донатеров.",
+            keyboard=get_info_menu()
+        )
     
-#     elif text == "🏆 Топ донатеров":
-#         top_list = [
-#             {"id": 609908758, "name": "Borz Yussupov", "amount": 73},
-#             {"id": 737242425, "name": "Phoenix Bey", "amount": 46},
-#             {"id": 1096325641, "name": "Hunter Bey", "amount": 30},
-#         ]
+    elif text == "🏆 Топ донатеров":
+        top_list = [
+            {"id": 609908758, "name": "Borz Yussupov", "amount": 73},
+            {"id": 737242425, "name": "Phoenix Bey", "amount": 46},
+            {"id": 1096325641, "name": "Hunter Bey", "amount": 30},
+        ]
         
-#         text = "🏆 **Топ донатеров (за всё время):**\n\n"
-#         for i, user in enumerate(top_list, 1):
-#             text += f"{i}. {user['name']} — {user['amount']}₽\n"
-#             text += f"   👤 vk.com/id{user['id']}\n"
+        # text = "🏆 **Топ донатеров (за всё время):**\n\n"
+        # for i, user in enumerate(top_list, 1):
+        #     text += f"{i}. {user['name']} — {user['amount']}₽\n"
+        #     text += f"   👤 vk.com/id{user['id']}\n"
         
-#         await message.answer(text, keyboard=get_info_menu())
+        await message.answer(text, keyboard=get_info_menu())
     
-#     elif text == "📜 Мои ссылки":
-#         uid = str(message.from_id)
-#         if uid not in history_db or not history_db[uid]:
-#             await message.answer("📜 У тебя пока нет сохранённых ссылок.", keyboard=get_my_menu())
-#         else:
-#             lines = ["📜 **Твои последние ссылки:**"]
-#             for idx, item in enumerate(history_db[uid], 1):
-#                 lines.append(f"{idx}. {item['link']}")
-#             await message.answer("\n".join(lines), keyboard=get_my_menu())
+    elif text == "📜 Мои ссылки":
+        uid = str(message.from_id)
+        if uid not in history_db or not history_db[uid]:
+            await message.answer("📜 У тебя пока нет сохранённых ссылок.", keyboard=get_my_menu())
+        else:
+            lines = ["📜 **Твои последние ссылки:**"]
+            for idx, item in enumerate(history_db[uid], 1):
+                lines.append(f"{idx}. {item['link']}")
+            await message.answer("\n".join(lines), keyboard=get_my_menu())
     
-#     elif text == "📊 История":
-#         await message.answer("📊 История (в разработке)", keyboard=get_my_menu())
+    elif text == "📊 История":
+        await message.answer("📊 История (в разработке)", keyboard=get_my_menu())
     
-#     elif text == "← Назад":
-#         user_menu_state[user_id] = "main"
-#         await message.answer("Главное меню:", keyboard=get_main_menu())
+    elif text == "← Назад":
+        user_menu_state[user_id] = "main"
+        await message.answer("Главное меню:", keyboard=get_main_menu())
 
-# @bot.on.message(attachment="photo")
-# async def photo_handler(message: Message):
-#     if message.from_id != message.peer_id:
-#         return
+@bot.on.message(attachment="photo")
+async def photo_handler(message: Message):
+    if message.from_id != message.peer_id:
+        return
     
-#     user_id = message.from_id
-#     state = user_menu_state.get(user_id)
+    user_id = message.from_id
+    state = user_menu_state.get(user_id)
     
-#     if state == "waiting_photo":
-#         for attachment in message.attachments:
-#             if attachment.photo:
-#                 photo = attachment.photo
-#                 long_url = str(photo.sizes[-1].url)
-#                 short_url = await shorten_url(long_url)
-#                 photo_id = f"photo{photo.owner_id}_{photo.id}"
-#                 add_link(message.from_id, short_url, "фото")
-#                 await message.answer(
-#                     f"✅ Готово!\n\n"
-#                     f"📌 Короткая ссылка:\n{short_url}\n\n"
-#                     f"📌 Attachment:\n{photo_id}",
-#                     keyboard=get_create_links_menu()
-#                 )
-#         user_menu_state[user_id] = "create"
+    if state == "waiting_photo":
+        for attachment in message.attachments:
+            if attachment.photo:
+                photo = attachment.photo
+                long_url = str(photo.sizes[-1].url)
+                short_url = await shorten_url(long_url)
+                photo_id = f"photo{photo.owner_id}_{photo.id}"
+                add_link(message.from_id, short_url, "фото")
+                await message.answer(
+                    f"✅ Готово!\n\n"
+                    f"📌 Короткая ссылка:\n{short_url}\n\n"
+                    f"📌 Attachment:\n{photo_id}",
+                    keyboard=get_create_links_menu()
+                )
+        user_menu_state[user_id] = "create"
     
-#     elif state == "waiting_enhance":
-#         for attachment in message.attachments:
-#             if attachment.photo:
-#                 photo = attachment.photo
-#                 photo_url = str(photo.sizes[-1].url)
+    elif state == "waiting_enhance":
+        for attachment in message.attachments:
+            if attachment.photo:
+                photo = attachment.photo
+                photo_url = str(photo.sizes[-1].url)
                 
-#                 async with aiohttp.ClientSession() as session:
-#                     async with session.get(photo_url) as resp:
-#                         image_bytes = await resp.read()
+                async with aiohttp.ClientSession() as session:
+                    async with session.get(photo_url) as resp:
+                        image_bytes = await resp.read()
                 
-#                 try:
-#                     img = Image.open(io.BytesIO(image_bytes))
-#                     enhancer = ImageEnhance.Contrast(img)
-#                     img = enhancer.enhance(1.3)
-#                     enhancer = ImageEnhance.Color(img)
-#                     img = enhancer.enhance(1.2)
-#                     enhancer = ImageEnhance.Sharpness(img)
-#                     img = enhancer.enhance(1.5)
-#                     output = io.BytesIO()
-#                     img.save(output, format='JPEG', quality=95)
-#                     enhanced_bytes = output.getvalue()
-#                 except Exception as e:
-#                     await message.answer(f"❌ Ошибка улучшения: {e}")
-#                     return
+                try:
+                    img = Image.open(io.BytesIO(image_bytes))
+                    enhancer = ImageEnhance.Contrast(img)
+                    img = enhancer.enhance(1.3)
+                    enhancer = ImageEnhance.Color(img)
+                    img = enhancer.enhance(1.2)
+                    enhancer = ImageEnhance.Sharpness(img)
+                    img = enhancer.enhance(1.5)
+                    output = io.BytesIO()
+                    img.save(output, format='JPEG', quality=95)
+                    enhanced_bytes = output.getvalue()
+                except Exception as e:
+                    await message.answer(f"❌ Ошибка улучшения: {e}")
+                    return
                 
-#                 await message.answer(
-#                     "✨ Качество улучшено!",
-#                     attachment=enhanced_bytes,
-#                     keyboard=get_create_links_menu()
-#                 )
-#         user_menu_state[user_id] = "create"
+                await message.answer(
+                    "✨ Качество улучшено!",
+                    attachment=enhanced_bytes,
+                    keyboard=get_create_links_menu()
+                )
+        user_menu_state[user_id] = "create"
     
-#     else:
-#         await message.answer(
-#             "📸 Сначала выбери действие в меню «Создать ссылку».",
-#             keyboard=get_main_menu()
-#         )
+    else:
+        await message.answer(
+            "📸 Сначала выбери действие в меню «Создать ссылку».",
+            keyboard=get_main_menu()
+        )
 
-# @bot.on.message(text=["чек", "скриншот"])
-# async def check_handler(message: Message):
-#     if message.from_id != message.peer_id:
-#         return
-#     await message.answer(
-#         "⏳ Ожидайте... Админ проверит и добавит вас в список донатеров.",
-#         keyboard=get_info_menu()
-#     )
+@bot.on.message(text=["чек", "скриншот"])
+async def check_handler(message: Message):
+    if message.from_id != message.peer_id:
+        return
+    await message.answer(
+        "⏳ Ожидайте... Админ проверит и добавит вас в список донатеров.",
+        keyboard=get_info_menu()
+    )
 
-# @bot.on.message()
-# async def unknown_handler(message: Message):
-#     if message.from_id != message.peer_id:
-#         return
-#     print(f"unknown_handler получил сообщение: {message.text}")
-#     await message.answer(
-#         "Выбери раздел в меню:",
-#         keyboard=get_main_menu()
-#     )
+@bot.on.message()
+async def unknown_handler(message: Message):
+    if message.from_id != message.peer_id:
+        return
+    print(f"unknown_handler получил сообщение: {message.text}")
+    await message.answer(
+        "Выбери раздел в меню:",
+        keyboard=get_main_menu()
+    )
 
-# if __name__ == "__main__":
-#     print("✅ Бот запущен и ждёт сообщения...")
-#     bot.run_forever()
+if __name__ == "__main__":
+    print("✅ Бот запущен и ждёт сообщения...")
+    bot.run_forever()
