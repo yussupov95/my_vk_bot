@@ -294,30 +294,15 @@ async def photo_handler(message: Message):
         for attachment in message.attachments:
             if attachment.photo:
                 photo = attachment.photo
-                photo_url = str(photo.sizes[-1].url)
-                
-                async with aiohttp.ClientSession() as session:
-                    async with session.get(photo_url) as resp:
-                        image_bytes = await resp.read()
-                
-                try:
-                    img = Image.open(io.BytesIO(image_bytes))
-                    enhancer = ImageEnhance.Contrast(img)
-                    img = enhancer.enhance(1.3)
-                    enhancer = ImageEnhance.Color(img)
-                    img = enhancer.enhance(1.2)
-                    enhancer = ImageEnhance.Sharpness(img)
-                    img = enhancer.enhance(1.5)
-                    output = io.BytesIO()
-                    img.save(output, format='JPEG', quality=95)
-                    enhanced_bytes = output.getvalue()
-                except Exception as e:
-                    await message.answer(f"❌ Ошибка улучшения: {e}")
-                    return
+                # Получаем ссылку на фото
+                long_url = str(photo.sizes[-1].url)
+                short_url = await shorten_url(long_url)
+                photo_id = f"photo{photo.owner_id}_{photo.id}"
                 
                 await message.answer(
-                    "✨ Качество улучшено!",
-                    attachment=enhanced_bytes,
+                    f"✨ Фото готово к использованию!\n\n"
+                    f"📌 Ссылка для скачивания:\n{short_url}\n\n"
+                    f"📌 Attachment:\n{photo_id}",
                     keyboard=get_create_links_menu()
                 )
         user_menu_state[user_id] = "create"
