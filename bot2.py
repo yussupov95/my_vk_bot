@@ -145,22 +145,21 @@ async def video_handler(message: Message):
     long_url = None
     
     if hasattr(video, 'files') and video.files:
-        if len(video.files) > 0:
+        if len(video.files) > 0 and hasattr(video.files[0], 'url'):
             long_url = str(video.files[0].url)
     
     if not long_url:
         long_url = f"https://vk.com/video{video.owner_id}_{video.id}"
     
-    short_url = await shorten_url(long_url)
-    video_id = f"video{video.owner_id}_{video.id}"
-    add_link(message.from_id, short_url, "видео")
+    short_url = await shorten_url(str(long_url))
+    
     await message.answer(
         f"✅ Готово!\n\n"
-        f"📌 Короткая ссылка:\n{short_url}\n\n"
-        f"📌 Attachment:\n{video_id}",
+        f"📌 Короткая ссылка:\n{short_url}",
         keyboard=get_create_links_menu()
     )
-
+    
+    add_link(message.from_id, short_url, "видео")
 @bot.on.message(text=["📸 Создать ссылку", "🎥 Видео", "🖼 Фото (обычная)", "🖼 Фото (Яндекс)", "✨ Улучшить качество", "🎥 Видео (обычная)", "🎥 Видео (Яндекс)", "🌐 Сайт", "ℹ️ Инфо", "👤 Моё", "📝 Отзывы", "💬 Наш чат", "💰 Благотворительность", "🏆 Топ донатеров", "📜 Мои ссылки", "📊 История", "← Назад"])
 async def menu_navigation(message: Message):
     if message.from_id != message.peer_id:
@@ -280,12 +279,10 @@ async def photo_handler(message: Message):
                 photo = attachment.photo
                 long_url = str(photo.sizes[-1].url)
                 short_url = await shorten_url(long_url)
-                photo_id = f"photo{photo.owner_id}_{photo.id}"
-                add_link(message.from_id, short_url, "фото")
+                
                 await message.answer(
                     f"✅ Готово!\n\n"
-                    f"📌 Короткая ссылка:\n{short_url}\n\n"
-                    f"📌 Attachment:\n{photo_id}",
+                    f"📌 Короткая ссылка:\n{short_url}",
                     keyboard=get_create_links_menu()
                 )
         user_menu_state[user_id] = "create"
@@ -294,15 +291,12 @@ async def photo_handler(message: Message):
         for attachment in message.attachments:
             if attachment.photo:
                 photo = attachment.photo
-                # Получаем ссылку на фото
                 long_url = str(photo.sizes[-1].url)
                 short_url = await shorten_url(long_url)
-                photo_id = f"photo{photo.owner_id}_{photo.id}"
                 
                 await message.answer(
-                    f"✨ Фото готово к использованию!\n\n"
-                    f"📌 Ссылка для скачивания:\n{short_url}\n\n"
-                    f"📌 Attachment:\n{photo_id}",
+                    f"✨ Ваше фото готово!\n\n"
+                    f"🔗 Ссылка для скачивания:\n{short_url}",
                     keyboard=get_create_links_menu()
                 )
         user_menu_state[user_id] = "create"
