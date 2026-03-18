@@ -115,6 +115,10 @@ def get_info_menu():
     keyboard.row()
     keyboard.add(Text("🏆 Топ донатеров"), color=KeyboardButtonColor.SECONDARY)
     keyboard.row()
+    keyboard.add(Text("🎁 Купить стикеры"), color=KeyboardButtonColor.SECONDARY)
+    keyboard.row()
+    keyboard.add(Text("💻 ПК-версия VK"), color=KeyboardButtonColor.SECONDARY)
+    keyboard.row()
     keyboard.add(Text("← Назад"), color=KeyboardButtonColor.SECONDARY)
     return keyboard
 
@@ -160,7 +164,8 @@ async def video_handler(message: Message):
     )
     
     add_link(message.from_id, short_url, "видео")
-@bot.on.message(text=["📸 Создать ссылку", "🎥 Видео", "🖼 Фото (обычная)", "🖼 Фото (Яндекс)", "✨ Улучшить качество", "🎥 Видео (обычная)", "🎥 Видео (Яндекс)", "🌐 Сайт", "ℹ️ Инфо", "👤 Моё", "📝 Отзывы", "💬 Наш чат", "💰 Благотворительность", "🏆 Топ донатеров", "📜 Мои ссылки", "📊 История", "← Назад"])
+
+@bot.on.message(text=["📸 Создать ссылку", "🎥 Видео", "🖼 Фото (обычная)", "🖼 Фото (Яндекс)", "✨ Улучшить качество", "🎥 Видео (обычная)", "🎥 Видео (Яндекс)", "🌐 Сайт", "ℹ️ Инфо", "👤 Моё", "📝 Отзывы", "💬 Наш чат", "💰 Благотворительность", "✅ Я перевёл", "🏆 Топ донатеров", "🎁 Купить стикеры", "💻 ПК-версия VK", "📜 Мои ссылки", "📊 История", "← Назад"])
 async def menu_navigation(message: Message):
     if message.from_id != message.peer_id:
         return
@@ -215,7 +220,7 @@ async def menu_navigation(message: Message):
     
     elif text == "💬 Наш чат":
         await message.answer("Присоединяйся к чату: https://vk.me/join/rYfRvnGZxRAFS6AQlpM_isdVTkMGwfGAefo=")
-
+    
     elif text == "💰 Благотворительность":
         await message.answer(
             f"💰 Номер карты Сбера:\n`2202 2081 4442 2046`\n\n"
@@ -230,10 +235,12 @@ async def menu_navigation(message: Message):
     
     elif text == "✅ Я перевёл":
         await message.answer(
-            "📸 Скиньте чек (скриншот перевода), чтобы мы убедились в платеже и добавили вас в список донатеров.",
+            "✅ **Хорошо!**\n\n"
+            "⏳ Ожидайте, в течение **12 часов** вам отправят стикерпак.\n\n"
+            "Если этого не произойдёт — напишите в техподдержку.",
             keyboard=get_info_menu()
         )
-    
+
     elif text == "🏆 Топ донатеров":
         top_list = [
             {"id": 609908758, "name": "Borz Yussupov", "amount": 73},
@@ -247,6 +254,30 @@ async def menu_navigation(message: Message):
             text += f"   👤 vk.com/id{user['id']}\n"
         
         await message.answer(text, keyboard=get_info_menu())
+    
+    elif text == "🎁 Купить стикеры":
+        await message.answer(
+            f"🎁 **Покупка стикерпаков**\n\n"
+            f"1️⃣ Напишите название стикерпака, который хотите купить\n"
+            f"2️⃣ Укажите его цену (например: 150)\n"
+            f"3️⃣ Я посчитаю итоговую сумму с комиссией\n\n"
+            f"📝 **Пример:** «Котики 150»\n\n"
+            f"После этого я покажу реквизиты для оплаты.",
+            keyboard=get_info_menu()
+        )
+        user_menu_state[user_id] = "waiting_sticker_info"
+    
+    elif text == "💻 ПК-версия VK":
+        await message.answer(
+            f"💻 **Как купить стикеры через ПК-версию**\n\n"
+            f"В мобильном приложении VK покупка стикеров недоступна, но ты можешь сделать это через ПК-версию прямо с телефона!\n\n"
+            f"🔗 **Ссылка:** https://vk.com\n\n"
+            f"📱 **Как открыть ПК-версию на телефоне:**\n"
+            f"1. Нажми на ссылку\n"
+            f"2. В браузере включи **«Версия для ПК»**\n"
+            f"3. Зайди в аккаунт и купи стикеры",
+            keyboard=get_info_menu()
+        )
     
     elif text == "📜 Мои ссылки":
         uid = str(message.from_id)
@@ -283,7 +314,6 @@ async def photo_handler(message: Message):
                 links.append(f"📌 {short_url}")
         
         if links:
-            # Отправляем все ссылки одним сообщением
             await message.answer(
                 f"✅ Готово! Ссылки на фото:\n\n" + "\n".join(links),
                 keyboard=get_create_links_menu()
@@ -296,17 +326,24 @@ async def photo_handler(message: Message):
         user_menu_state[user_id] = "create"
     
     elif state == "waiting_enhance":
+        links = []
         for attachment in message.attachments:
             if attachment.photo:
                 photo = attachment.photo
                 long_url = str(photo.sizes[-1].url)
                 short_url = await shorten_url(long_url)
-                
-                await message.answer(
-                    f"✨ Ваше фото готово!\n\n"
-                    f"🔗 Ссылка для скачивания:\n{short_url}",
-                    keyboard=get_create_links_menu()
-                )
+                links.append(f"✨ {short_url}")
+        
+        if links:
+            await message.answer(
+                f"✨ Ваши фото готовы!\n\n" + "\n".join(links),
+                keyboard=get_create_links_menu()
+            )
+        else:
+            await message.answer(
+                "❌ Не найдено фото в сообщении.",
+                keyboard=get_create_links_menu()
+            )
         user_menu_state[user_id] = "create"
     
     else:
@@ -315,20 +352,59 @@ async def photo_handler(message: Message):
             keyboard=get_main_menu()
         )
 
-@bot.on.message(text=["чек", "скриншот"])
-async def check_handler(message: Message):
+@bot.on.message()
+async def sticker_price_handler(message: Message):
     if message.from_id != message.peer_id:
         return
-    await message.answer(
-        "⏳ Ожидайте... Админ проверит и добавит вас в список донатеров.",
-        keyboard=get_info_menu()
-    )
+    
+    user_id = message.from_id
+    state = user_menu_state.get(user_id)
+    
+    if state == "waiting_sticker_info":
+        text = message.text.strip()
+        parts = text.split()
+        
+        try:
+            price = int(parts[-1])
+            sticker_name = " ".join(parts[:-1])
+        except:
+            await message.answer(
+                "❌ Не понял. Напишите название и цену, например:\n"
+                "«Котики 150»",
+                keyboard=get_info_menu()
+            )
+            return
+        
+        commission = int(price * 0.2)
+        total = price + commission
+        
+        user_menu_state[user_id] = f"sticker_{sticker_name}_{total}"
+        
+        await message.answer(
+            f"✅ **Стикерпак «{sticker_name}»**\n\n"
+            f"💰 Цена: {price}₽\n"
+            f"➕ Комиссия (20%): {commission}₽\n"
+            f"💳 **Итого к оплате: {total}₽**\n\n"
+            f"Переведите **ровно {total}₽** на карту:\n"
+            f"`2202 2081 4442 2046`\n\n"
+            f"После перевода нажмите кнопку **«✅ Я перевёл»**",
+            keyboard=(
+                Keyboard(inline=False)
+                .add(Text("✅ Я перевёл"), color=KeyboardButtonColor.POSITIVE)
+                .row()
+                .add(Text("← Назад"), color=KeyboardButtonColor.SECONDARY)
+            )
+        )
+        user_menu_state[user_id] = f"waiting_payment_{sticker_name}_{total}"
+        return  # ← важно!
+    
+    # Если не в режиме ожидания стикера
+    await unknown_handler(message)
 
 @bot.on.message()
 async def unknown_handler(message: Message):
     if message.from_id != message.peer_id:
         return
-    print(f"unknown_handler получил сообщение: {message.text}")
     await message.answer(
         "Выбери раздел в меню:",
         keyboard=get_main_menu()
